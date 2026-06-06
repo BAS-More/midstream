@@ -96,11 +96,11 @@ jobs:
     strategy:
       matrix:
         crate:
-          - temporal-compare
-          - nanosecond-scheduler
-          - temporal-attractor-studio
-          - temporal-neural-solver
-          - strange-loop
+          - midstreamer-temporal-compare
+          - midstreamer-scheduler
+          - midstreamer-attractor
+          - midstreamer-neural-solver
+          - midstreamer-strange-loop
 
     steps:
       - uses: actions/checkout@v4
@@ -126,9 +126,9 @@ jobs:
     strategy:
       matrix:
         crate:
-          - temporal-compare
-          - nanosecond-scheduler
-          - strange-loop
+          - midstreamer-temporal-compare
+          - midstreamer-scheduler
+          - midstreamer-strange-loop
 
     steps:
       - uses: actions/checkout@v4
