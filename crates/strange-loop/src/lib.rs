@@ -9,14 +9,14 @@
 //! - Tangled hierarchies
 //! - Meta-knowledge extraction
 
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use thiserror::Error;
 use dashmap::DashMap;
-use std::sync::Arc;
-use midstreamer_temporal_compare::TemporalComparator;
 use midstreamer_attractor::{AttractorAnalyzer, PhasePoint};
 use midstreamer_neural_solver::TemporalNeuralSolver;
+use midstreamer_temporal_compare::TemporalComparator;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Arc;
+use thiserror::Error;
 
 /// Strange loop errors
 #[derive(Debug, Error)]
@@ -217,7 +217,7 @@ impl StrangeLoop {
         // Store meta-knowledge
         self.meta_knowledge
             .entry(level)
-            .or_insert_with(Vec::new)
+            .or_default()
             .extend(patterns.clone());
 
         // If not at max depth, meta-learn from this level
@@ -238,10 +238,7 @@ impl StrangeLoop {
         };
 
         // Extract meta-patterns
-        let meta_patterns: Vec<String> = knowledge
-            .iter()
-            .map(|k| k.pattern.clone())
-            .collect();
+        let meta_patterns: Vec<String> = knowledge.iter().map(|k| k.pattern.clone()).collect();
 
         // Learn at next level
         let next_level = level.next();
@@ -256,43 +253,39 @@ impl StrangeLoop {
         level: MetaLevel,
         data: &[String],
     ) -> Result<Vec<MetaKnowledge>, StrangeLoopError> {
-        let mut patterns = Vec::new();
-
-        // Find recurring patterns using temporal comparison
-        for i in 0..data.len() {
-            for j in i+1..data.len() {
-                if data[i] == data[j] {
-                    // Found a repeating pattern
-                    let pattern = MetaKnowledge::new(
-                        level,
-                        data[i].clone(),
-                        0.8, // Confidence
-                    );
-                    patterns.push(pattern);
-                }
-            }
+        // Each distinct element becomes a piece of meta-knowledge; elements that
+        // recur are scored with higher confidence.
+        let mut counts: HashMap<&String, usize> = HashMap::new();
+        for item in data {
+            *counts.entry(item).or_insert(0) += 1;
         }
 
-        // Limit number of patterns
+        let mut patterns: Vec<MetaKnowledge> = counts
+            .into_iter()
+            .map(|(pattern, count)| {
+                let confidence = (0.5 + 0.1 * count as f64).min(1.0);
+                MetaKnowledge::new(level, pattern.clone(), confidence)
+            })
+            .collect();
+
+        // Deterministic order, then limit the number of patterns.
+        patterns.sort_by(|a, b| a.pattern.cmp(&b.pattern));
         patterns.truncate(100);
 
         Ok(patterns)
     }
 
     /// Apply self-modification with safety checks
-    pub fn apply_modification(
-        &mut self,
-        rule: ModificationRule,
-    ) -> Result<(), StrangeLoopError> {
+    pub fn apply_modification(&mut self, rule: ModificationRule) -> Result<(), StrangeLoopError> {
         if !self.config.enable_self_modification {
             return Err(StrangeLoopError::InvalidModification(
-                "Self-modification is disabled".to_string()
+                "Self-modification is disabled".to_string(),
             ));
         }
 
         if self.modification_count >= self.config.max_modifications_per_cycle {
             return Err(StrangeLoopError::InvalidModification(
-                "Max modifications per cycle reached".to_string()
+                "Max modifications per cycle reached".to_string(),
             ));
         }
 
@@ -348,7 +341,8 @@ impl StrangeLoop {
 
     /// Get summary statistics
     pub fn get_summary(&self) -> MetaLearningSummary {
-        let total_knowledge: usize = self.meta_knowledge
+        let total_knowledge: usize = self
+            .meta_knowledge
             .iter()
             .map(|entry| entry.value().len())
             .sum();
@@ -358,7 +352,8 @@ impl StrangeLoop {
             total_knowledge,
             total_modifications: self.modification_count,
             safety_violations: self.safety_violations,
-            learning_iterations: self.learning_iterations
+            learning_iterations: self
+                .learning_iterations
                 .iter()
                 .map(|entry| *entry.value())
                 .sum(),
@@ -375,14 +370,20 @@ impl StrangeLoop {
     }
 
     /// Analyze behavioral dynamics using attractor analysis
-    pub fn analyze_behavior(&mut self, trajectory_data: Vec<Vec<f64>>) -> Result<String, StrangeLoopError> {
+    pub fn analyze_behavior(
+        &mut self,
+        trajectory_data: Vec<Vec<f64>>,
+    ) -> Result<String, StrangeLoopError> {
         for (i, point_data) in trajectory_data.iter().enumerate() {
             let point = PhasePoint::new(point_data.clone(), i as u64);
-            self.attractor_analyzer.add_point(point)
+            self.attractor_analyzer
+                .add_point(point)
                 .map_err(|e| StrangeLoopError::MetaLearningFailed(e.to_string()))?;
         }
 
-        let analysis = self.attractor_analyzer.analyze()
+        let analysis = self
+            .attractor_analyzer
+            .analyze()
             .map_err(|e| StrangeLoopError::MetaLearningFailed(e.to_string()))?;
 
         Ok(format!("{:?}", analysis.attractor_type))
@@ -472,7 +473,11 @@ mod tests {
     fn test_summary() {
         let mut strange_loop = StrangeLoop::default();
 
-        let data = vec!["pattern1".to_string(), "pattern2".to_string()];
+        let data = vec![
+            "pattern1".to_string(),
+            "pattern2".to_string(),
+            "pattern1".to_string(),
+        ];
         let _ = strange_loop.learn_at_level(MetaLevel::base(), &data);
 
         let summary = strange_loop.get_summary();

@@ -2,7 +2,6 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use async_trait::async_trait;
 
 use super::agent::Action;
 
@@ -65,20 +64,28 @@ impl StreamLearner {
         // Update model based on strategy
         match &self.strategy {
             AdaptationStrategy::Immediate => {
-                self.model.update_immediate(&experience, self.learning_rate).await?;
+                self.model
+                    .update_immediate(&experience, self.learning_rate)
+                    .await?;
             }
             AdaptationStrategy::Batched { batch_size } => {
-                if self.iterations % batch_size == 0 {
-                    self.model.update_batch(&self.experience_buffer, self.learning_rate).await?;
+                if self.iterations.is_multiple_of(*batch_size) {
+                    self.model
+                        .update_batch(&self.experience_buffer, self.learning_rate)
+                        .await?;
                 }
             }
             AdaptationStrategy::ExperienceReplay { replay_size } => {
-                self.model.update_immediate(&experience, self.learning_rate).await?;
+                self.model
+                    .update_immediate(&experience, self.learning_rate)
+                    .await?;
 
                 // Replay random experiences
                 let replay_samples = self.sample_experiences(*replay_size);
                 for sample in replay_samples {
-                    self.model.update_immediate(&sample, self.learning_rate * 0.5).await?;
+                    self.model
+                        .update_immediate(&sample, self.learning_rate * 0.5)
+                        .await?;
                 }
             }
         }
@@ -98,11 +105,7 @@ impl StreamLearner {
 
         let step = (total as f64 / n as f64).max(1.0) as usize;
 
-        experiences.iter()
-            .step_by(step)
-            .take(n)
-            .cloned()
-            .collect()
+        experiences.iter().step_by(step).take(n).cloned().collect()
     }
 
     /// Predict reward for an action
@@ -125,9 +128,7 @@ impl StreamLearner {
             return 0.0;
         }
 
-        let sum: f64 = self.experience_buffer.iter()
-            .map(|e| e.reward)
-            .sum();
+        let sum: f64 = self.experience_buffer.iter().map(|e| e.reward).sum();
 
         sum / self.experience_buffer.len() as f64
     }
@@ -149,6 +150,12 @@ pub struct OnlineModel {
     feature_stats: HashMap<String, FeatureStats>,
 }
 
+impl Default for OnlineModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl OnlineModel {
     pub fn new() -> Self {
         Self {
@@ -163,22 +170,13 @@ impl OnlineModel {
         let mut features = HashMap::new();
 
         // Action type feature
-        features.insert(
-            format!("action_{}", action.action_type),
-            1.0,
-        );
+        features.insert(format!("action_{}", action.action_type), 1.0);
 
         // Number of parameters
-        features.insert(
-            "param_count".to_string(),
-            action.parameters.len() as f64,
-        );
+        features.insert("param_count".to_string(), action.parameters.len() as f64);
 
         // Number of tool calls
-        features.insert(
-            "tool_count".to_string(),
-            action.tool_calls.len() as f64,
-        );
+        features.insert("tool_count".to_string(), action.tool_calls.len() as f64);
 
         // Context length
         features.insert(
@@ -187,10 +185,7 @@ impl OnlineModel {
         );
 
         // Expected reward (from action)
-        features.insert(
-            "expected_reward".to_string(),
-            action.expected_reward,
-        );
+        features.insert("expected_reward".to_string(), action.expected_reward);
 
         features
     }
@@ -231,7 +226,7 @@ impl OnlineModel {
             *weight += learning_rate * error * value;
 
             // Update feature statistics
-            let stats = self.feature_stats.entry(feature).or_insert(FeatureStats::default());
+            let stats = self.feature_stats.entry(feature).or_default();
             stats.update(value);
         }
 
@@ -266,9 +261,10 @@ pub struct Experience {
 }
 
 /// Adaptation strategy for online learning
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub enum AdaptationStrategy {
     /// Update immediately after each experience
+    #[default]
     Immediate,
 
     /// Update in batches
@@ -276,12 +272,6 @@ pub enum AdaptationStrategy {
 
     /// Use experience replay
     ExperienceReplay { replay_size: usize },
-}
-
-impl Default for AdaptationStrategy {
-    fn default() -> Self {
-        AdaptationStrategy::Immediate
-    }
 }
 
 /// Feature statistics for normalization
@@ -299,6 +289,7 @@ impl FeatureStats {
         self.sum_squared += value * value;
     }
 
+    #[allow(dead_code)]
     fn mean(&self) -> f64 {
         if self.count == 0 {
             0.0
@@ -307,6 +298,7 @@ impl FeatureStats {
         }
     }
 
+    #[allow(dead_code)]
     fn variance(&self) -> f64 {
         if self.count == 0 {
             0.0

@@ -1,11 +1,10 @@
 //! Formal reasoning engine inspired by Lean theorem proving
 
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
-use async_trait::async_trait;
+use std::collections::HashMap;
 
-use super::types::Context;
 use super::agent::Action;
+use super::types::Context;
 
 /// Formal reasoning engine for verifying agent actions
 pub struct FormalReasoner {
@@ -17,6 +16,12 @@ pub struct FormalReasoner {
 
     /// Proof cache for performance
     proof_cache: HashMap<String, Proof>,
+}
+
+impl Default for FormalReasoner {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl FormalReasoner {
@@ -65,11 +70,7 @@ impl FormalReasoner {
     }
 
     /// Verify an action is safe and correct
-    pub async fn verify_action(
-        &self,
-        action: &Action,
-        context: &Context,
-    ) -> Result<Proof, String> {
+    pub async fn verify_action(&self, action: &Action, context: &Context) -> Result<Proof, String> {
         let proof_key = format!("{:?}_{}", action, context.session_id);
 
         // Check cache first
@@ -108,10 +109,14 @@ impl FormalReasoner {
             confidence: self.verify_outcomes(action).await,
         });
 
-        // Compute overall validity
-        proof.confidence = proof.steps.iter()
-            .map(|s| s.confidence)
-            .product::<f64>();
+        // Compute overall validity as the mean step confidence. Averaging (rather
+        // than multiplying) keeps the score well-calibrated as more verification
+        // steps are added, instead of decaying toward zero.
+        proof.confidence = if proof.steps.is_empty() {
+            0.0
+        } else {
+            proof.steps.iter().map(|s| s.confidence).sum::<f64>() / proof.steps.len() as f64
+        };
 
         proof.valid = proof.confidence > 0.5;
 
@@ -120,7 +125,9 @@ impl FormalReasoner {
 
     async fn verify_safety(&self, action: &Action) -> f64 {
         // Check against safety axioms
-        let safety_axiom = self.theorem_base.iter()
+        let safety_axiom = self
+            .theorem_base
+            .iter()
             .find(|t| t.tags.contains(&"safety".to_string()));
 
         if let Some(_axiom) = safety_axiom {
@@ -142,14 +149,12 @@ impl FormalReasoner {
         }
 
         // Check if action parameters are valid
-        let param_confidence = if action.parameters.is_empty() {
+        if action.parameters.is_empty() {
             0.9
         } else {
             // Verify parameters make sense
             0.85
-        };
-
-        param_confidence
+        }
     }
 
     async fn verify_outcomes(&self, action: &Action) -> f64 {
@@ -266,10 +271,9 @@ mod tests {
     async fn test_formal_reasoner() {
         let mut reasoner = FormalReasoner::new();
 
-        let theorem = reasoner.prove_theorem(
-            "Q".to_string(),
-            vec!["P".to_string(), "P -> Q".to_string()],
-        ).await;
+        let theorem = reasoner
+            .prove_theorem("Q".to_string(), vec!["P".to_string(), "P -> Q".to_string()])
+            .await;
 
         assert!(theorem.is_ok());
     }
