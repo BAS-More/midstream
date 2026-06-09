@@ -14,6 +14,8 @@ use tokio::runtime::Runtime;
 
 // Mock QUIC components for benchmarking (since we need a server for real tests)
 mod mock {
+    #![allow(dead_code)]
+
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::sync::Arc;
 
@@ -56,11 +58,7 @@ mod mock {
     }
 
     impl MockStream {
-        fn new(
-            bytes_sent: Arc<AtomicU64>,
-            bytes_received: Arc<AtomicU64>,
-            rtt_us: u64,
-        ) -> Self {
+        fn new(bytes_sent: Arc<AtomicU64>, bytes_received: Arc<AtomicU64>, rtt_us: u64) -> Self {
             Self {
                 bytes_sent,
                 bytes_received,
@@ -71,7 +69,8 @@ mod mock {
         pub async fn send(&mut self, data: &[u8]) -> Result<usize, String> {
             // Simulate network delay
             tokio::time::sleep(tokio::time::Duration::from_micros(self.rtt_us / 2)).await;
-            self.bytes_sent.fetch_add(data.len() as u64, Ordering::Relaxed);
+            self.bytes_sent
+                .fetch_add(data.len() as u64, Ordering::Relaxed);
             Ok(data.len())
         }
 
@@ -79,8 +78,7 @@ mod mock {
             // Simulate network delay
             tokio::time::sleep(tokio::time::Duration::from_micros(self.rtt_us / 2)).await;
             let len = buf.len().min(8192); // Simulate typical packet size
-            self.bytes_received
-                .fetch_add(len as u64, Ordering::Relaxed);
+            self.bytes_received.fetch_add(len as u64, Ordering::Relaxed);
             Ok(len)
         }
 

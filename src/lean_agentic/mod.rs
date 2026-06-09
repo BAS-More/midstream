@@ -31,48 +31,43 @@
 //! └─────────────────────────────────────────────────────────┘
 //! ```
 
-pub mod reasoning;
 pub mod agent;
+pub mod attractor;
 pub mod knowledge;
 pub mod learning;
-pub mod types;
 pub mod optimized;
-pub mod temporal;
+pub mod reasoning;
 pub mod scheduler;
-pub mod attractor;
-pub mod temporal_neural;
 pub mod strange_loop;
+pub mod temporal;
+pub mod temporal_neural;
+pub mod types;
 
-pub use reasoning::{FormalReasoner, Theorem, Proof, ProofStep};
-pub use agent::{AgenticLoop, Action, Observation, Plan, LearningSignal};
-pub use knowledge::{KnowledgeGraph, TheoremStore, Entity, Relation};
-pub use learning::{StreamLearner, OnlineModel, AdaptationStrategy};
-pub use types::{AgentState, Context, Reward};
-pub use optimized::{
-    FeatureCache, BufferPool, PredictionCache, BatchProcessor,
-    FastEntityExtractor, fast_hash, simd,
-};
-pub use temporal::{
-    TemporalComparator, Sequence, ComparisonAlgorithm, CacheStats,
-};
-pub use scheduler::{
-    RealtimeScheduler, ScheduledTask, SchedulingPolicy, Priority,
-    SchedulableAction, SchedulerStats,
-};
+pub use agent::{Action, AgenticLoop, LearningSignal, Observation, Plan};
 pub use attractor::{
-    AttractorAnalyzer, BehaviorAttractorAnalyzer, AttractorType,
-    AttractorInfo, Trajectory, PhasePoint, BehaviorSummary,
+    AttractorAnalyzer, AttractorInfo, AttractorType, BehaviorAttractorAnalyzer, BehaviorSummary,
+    PhasePoint, Trajectory,
 };
-pub use temporal_neural::{
-    TemporalNeuralSolver, TemporalFormula, TemporalOperator,
-    TemporalTrace, TemporalState, VerificationResult,
-};
+pub use knowledge::{Entity, EntityType, KnowledgeGraph, Relation};
+pub use learning::{AdaptationStrategy, OnlineModel, StreamLearner};
 pub use midstreamer_strange_loop::{
-    MetaLearner, MetaLevel, MetaKnowledge, StrangeLoop,
-    ModificationRule, SafetyConstraint, MetaLearningSummary,
+    MetaKnowledge, MetaLearner, MetaLearningSummary, MetaLevel, ModificationRule, SafetyConstraint,
+    StrangeLoop,
 };
+pub use optimized::{
+    fast_hash, simd, BatchProcessor, BufferPool, FastEntityExtractor, FeatureCache, PredictionCache,
+};
+pub use reasoning::{FormalReasoner, Proof, ProofStep, Theorem};
+pub use scheduler::{
+    Priority, RealtimeScheduler, SchedulableAction, ScheduledTask, SchedulerStats, SchedulingPolicy,
+};
+pub use temporal::{CacheStats, ComparisonAlgorithm, Sequence, TemporalComparator};
+pub use temporal_neural::{
+    TemporalFormula, TemporalNeuralSolver, TemporalOperator, TemporalState, TemporalTrace,
+    VerificationResult,
+};
+pub use types::{AgentState, Context, Reward};
 
-use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -177,11 +172,13 @@ impl LeanAgenticSystem {
         learner.update(&action, reward, chunk).await?;
 
         // 6. Learn from experience
-        agent.learn(LearningSignal {
-            action: action.clone(),
-            observation: observation.clone(),
-            reward,
-        }).await?;
+        agent
+            .learn(LearningSignal {
+                action: action.clone(),
+                observation: observation.clone(),
+                reward,
+            })
+            .await?;
 
         Ok(ProcessingResult {
             action,
@@ -243,6 +240,15 @@ pub enum LeanAgenticError {
 
     #[error("Knowledge graph error: {0}")]
     KnowledgeGraphError(String),
+
+    #[error("{0}")]
+    Other(String),
+}
+
+impl From<String> for LeanAgenticError {
+    fn from(message: String) -> Self {
+        LeanAgenticError::Other(message)
+    }
 }
 
 #[cfg(test)]
@@ -254,7 +260,8 @@ mod tests {
         let config = LeanAgenticConfig::default();
         let system = LeanAgenticSystem::new(config);
 
-        let context = Context::default();
+        let mut context = Context::default();
+        context.add_message("Hi there".to_string());
         let chunk = "Hello, world!";
 
         let result = system.process_stream_chunk(chunk, context).await;

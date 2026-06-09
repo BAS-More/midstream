@@ -8,7 +8,6 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
-use std::sync::Arc;
 
 /// Level in the meta-hierarchy
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -100,6 +99,7 @@ pub struct MetaLearner {
 
 /// An event in the learning history
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct LearningEvent {
     level: MetaLevel,
     content: String,
@@ -250,7 +250,7 @@ impl MetaLearner {
         }
 
         // Look for patterns where we learn about our own learning
-        let mut level_sequence: Vec<MetaLevel> = self
+        let level_sequence: Vec<MetaLevel> = self
             .learning_history
             .iter()
             .rev()
@@ -269,14 +269,19 @@ impl MetaLearner {
                     levels: vec![level_sequence[i], level_sequence[i + 1]],
                     description: format!(
                         "Oscillation between {:?} and {:?}",
-                        level_sequence[i], level_sequence[i + 1]
+                        level_sequence[i],
+                        level_sequence[i + 1]
                     ),
                     strength: 0.5,
                     is_beneficial: true, // Assume beneficial unless proven otherwise
                 };
 
                 // Check if loop already exists
-                if !self.strange_loops.iter().any(|l| l.levels == strange_loop.levels) {
+                if !self
+                    .strange_loops
+                    .iter()
+                    .any(|l| l.levels == strange_loop.levels)
+                {
                     self.strange_loops.push(strange_loop);
                 }
             }
@@ -322,16 +327,12 @@ impl MetaLearner {
     pub fn self_modify(&mut self, rule: ModificationRule) -> Result<(), String> {
         // Check safety constraints
         for constraint in &mut self.safety_constraints {
-            if rule.action.contains("infinite")
-                && constraint.name == "no_infinite_loops"
-            {
+            if rule.action.contains("infinite") && constraint.name == "no_infinite_loops" {
                 constraint.is_violated = true;
                 return Err(format!("Safety constraint violated: {}", constraint.name));
             }
 
-            if rule.action.contains("core")
-                && constraint.name == "preserve_core_functionality"
-            {
+            if rule.action.contains("core") && constraint.name == "preserve_core_functionality" {
                 constraint.is_violated = true;
                 return Err(format!("Safety constraint violated: {}", constraint.name));
             }
@@ -465,9 +466,8 @@ mod tests {
         let meta1_knowledge = learner.get_knowledge_at_level(MetaLevel::Meta1);
         println!("Meta1 knowledge: {:?}", meta1_knowledge);
 
-        // May or may not have meta-knowledge depending on timing
-        // Just verify it doesn't crash
-        assert!(meta1_knowledge.len() >= 0);
+        // May or may not have meta-knowledge depending on timing;
+        // the test passes as long as the calls above do not panic.
     }
 
     #[test]
@@ -486,8 +486,7 @@ mod tests {
         let loops = learner.get_strange_loops();
         println!("Detected loops: {:?}", loops);
 
-        // May detect loops
-        assert!(loops.len() >= 0);
+        // May detect loops; the test passes as long as the calls above do not panic.
     }
 
     #[test]

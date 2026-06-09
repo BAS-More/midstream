@@ -6,7 +6,6 @@
 //! - Stability analysis
 //! - Chaos detection via Lyapunov exponents
 
-use nalgebra::{DMatrix, DVector};
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 
@@ -47,16 +46,13 @@ pub struct AttractorInfo {
 pub struct Trajectory {
     points: Vec<PhasePoint>,
     embedding_dimension: usize,
+    #[allow(dead_code)]
     time_delay: usize,
 }
 
 impl Trajectory {
     /// Create a new trajectory with time-delay embedding
-    pub fn from_timeseries(
-        data: &[f64],
-        embedding_dim: usize,
-        time_delay: usize,
-    ) -> Self {
+    pub fn from_timeseries(data: &[f64], embedding_dim: usize, time_delay: usize) -> Self {
         let mut points = Vec::new();
 
         // Time-delay embedding (Takens' theorem)
@@ -99,6 +95,7 @@ pub struct AttractorAnalyzer {
     embedding_dimension: usize,
     time_delay: usize,
     min_trajectory_length: usize,
+    #[allow(dead_code)]
     lyapunov_iterations: usize,
 }
 
@@ -124,11 +121,8 @@ impl AttractorAnalyzer {
         }
 
         // Reconstruct phase space
-        let trajectory = Trajectory::from_timeseries(
-            data,
-            self.embedding_dimension,
-            self.time_delay,
-        );
+        let trajectory =
+            Trajectory::from_timeseries(data, self.embedding_dimension, self.time_delay);
 
         // Calculate Lyapunov exponent
         let lyapunov = self.calculate_lyapunov_exponent(&trajectory);
@@ -136,11 +130,11 @@ impl AttractorAnalyzer {
         // Calculate correlation dimension
         let corr_dim = self.calculate_correlation_dimension(&trajectory);
 
-        // Detect attractor type
-        let attractor_type = self.classify_attractor(lyapunov, corr_dim);
-
         // Calculate stability
         let stability = self.calculate_stability(&trajectory);
+
+        // Detect attractor type
+        let attractor_type = self.classify_attractor(lyapunov, corr_dim, stability);
 
         Ok(AttractorInfo {
             attractor_type,
@@ -220,22 +214,21 @@ impl AttractorAnalyzer {
     }
 
     /// Classify attractor type based on characteristics
-    fn classify_attractor(&self, lyapunov: f64, corr_dim: f64) -> AttractorType {
+    fn classify_attractor(&self, lyapunov: f64, corr_dim: f64, stability: f64) -> AttractorType {
+        // A trajectory that barely moves from its centroid is a fixed point
+        // (stable equilibrium), regardless of the degenerate Lyapunov estimate.
+        if stability < 1e-6 {
+            return AttractorType::FixedPoint;
+        }
+
         if lyapunov > 0.1 {
             // Positive Lyapunov => chaos
             AttractorType::StrangeAttractor
-        } else if lyapunov < -0.1 {
-            // Negative Lyapunov => stable
-            if corr_dim < 0.5 {
-                AttractorType::FixedPoint
-            } else if corr_dim < 1.5 {
-                AttractorType::LimitCycle
-            } else {
-                AttractorType::Torus
-            }
+        } else if corr_dim < 1.5 {
+            // Bounded, low-dimensional dynamics => periodic / quasi-periodic
+            AttractorType::LimitCycle
         } else {
-            // Near zero => borderline or transitional
-            AttractorType::Unknown
+            AttractorType::Torus
         }
     }
 
@@ -429,9 +422,7 @@ mod tests {
         let analyzer = AttractorAnalyzer::new(2, 1);
 
         // Sine wave => limit cycle
-        let data: Vec<f64> = (0..100)
-            .map(|i| (i as f64 * 0.1).sin())
-            .collect();
+        let data: Vec<f64> = (0..100).map(|i| (i as f64 * 0.1).sin()).collect();
 
         let info = analyzer.analyze(&data).unwrap();
 

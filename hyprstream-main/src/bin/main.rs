@@ -172,7 +172,7 @@ use clap::Parser;
 use hyprstream_core::{
     config::{CliArgs, Settings},
     service::FlightSqlService,
-    storage::{StorageBackend, adbc::AdbcBackend, duckdb::DuckDbBackend},
+    storage::{adbc::AdbcBackend, duckdb::DuckDbBackend, StorageBackend},
 };
 use std::sync::Arc;
 use tonic::transport::Server;
@@ -180,26 +180,22 @@ use tonic::transport::Server;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli_args = CliArgs::parse();
-    
+
     // Load settings from config file and CLI args
     let settings = Settings::new(cli_args)?;
-    
+
     // Create the storage backend based on configuration
     let engine_backend: Box<dyn StorageBackend> = match settings.engine.engine.as_str() {
-        "adbc" => {
-            Box::new(AdbcBackend::new_with_options(
-                &settings.engine.connection,
-                &settings.engine.options,
-                settings.engine.credentials.as_ref(),
-            )?)
-        }
-        "duckdb" => {
-            Box::new(DuckDbBackend::new_with_options(
-                &settings.engine.connection,
-                &settings.engine.options,
-                settings.engine.credentials.as_ref(),
-            )?)
-        }
+        "adbc" => Box::new(AdbcBackend::new_with_options(
+            &settings.engine.connection,
+            &settings.engine.options,
+            settings.engine.credentials.as_ref(),
+        )?),
+        "duckdb" => Box::new(DuckDbBackend::new_with_options(
+            &settings.engine.connection,
+            &settings.engine.options,
+            settings.engine.credentials.as_ref(),
+        )?),
         _ => return Err("Unsupported engine type".into()),
     };
 
@@ -210,20 +206,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cache_backend = if settings.cache.enabled {
         let cache_config = &settings.cache;
         let backend: Box<dyn StorageBackend> = match cache_config.engine.as_str() {
-            "adbc" => {
-                Box::new(AdbcBackend::new_with_options(
-                    &cache_config.connection,
-                    &cache_config.options,
-                    cache_config.credentials.as_ref(),
-                )?)
-            }
-            "duckdb" => {
-                Box::new(DuckDbBackend::new_with_options(
-                    &cache_config.connection,
-                    &cache_config.options,
-                    cache_config.credentials.as_ref(),
-                )?)
-            }
+            "adbc" => Box::new(AdbcBackend::new_with_options(
+                &cache_config.connection,
+                &cache_config.options,
+                cache_config.credentials.as_ref(),
+            )?),
+            "duckdb" => Box::new(DuckDbBackend::new_with_options(
+                &cache_config.connection,
+                &cache_config.options,
+                cache_config.credentials.as_ref(),
+            )?),
             _ => return Err("Unsupported cache engine type".into()),
         };
         Some(backend)
@@ -237,7 +229,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Start the server
     let addr = format!("{}:{}", settings.server.host, settings.server.port).parse()?;
     println!("Starting server on {}", addr);
-    
+
     Server::builder()
         .add_service(arrow_flight::flight_service_server::FlightServiceServer::new(service))
         .serve(addr)
