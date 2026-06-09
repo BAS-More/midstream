@@ -1,20 +1,13 @@
 {
-  "name": "midstreamer",
-  "version": "0.2.4",
-  "description": "WebAssembly-powered temporal analysis toolkit - DTW, LCS, scheduling, and meta-learning",
-  "main": "pkg-node/midstream_wasm.js",
-  "module": "pkg-bundler/midstream_wasm.js",
-  "types": "pkg/midstream_wasm.d.ts",
-  "bin": {
-    "midstreamer": "./cli.js"
-  },
+  "name": "@midstream/wasm",
+  "version": "1.0.0",
+  "description": "WebAssembly bindings for Midstream temporal comparison, scheduling, and meta-learning",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "types/index.d.ts",
   "files": [
-    "pkg",
-    "pkg-node",
-    "pkg-bundler",
-    "src",
-    "examples",
-    "cli.js",
+    "dist",
+    "types",
     "README.md"
   ],
   "scripts": {
@@ -27,7 +20,7 @@
     "dev": "webpack serve --mode development --open",
     "test": "wasm-pack test --headless --chrome",
     "clean": "rm -rf pkg pkg-bundler pkg-node dist",
-    "prepublishOnly": "npm run clean && npm run build && rm -f pkg/package.json pkg/.gitignore pkg/README.md pkg-node/package.json pkg-node/.gitignore pkg-node/README.md pkg-bundler/package.json pkg-bundler/.gitignore pkg-bundler/README.md"
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
@@ -50,18 +43,16 @@
   "author": "Midstream Contributors",
   "license": "MIT",
   "dependencies": {
-    "@peculiar/webcrypto": "^1.4.3",
-    "agentdb": "^1.6.1",
-    "midstreamer": "^0.2.2"
+    "@peculiar/webcrypto": "^1.4.3"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "^14.0.0",
-    "html-webpack-plugin": "^5.5.4",
-    "typescript": "^5.3.3",
-    "wasm-pack": "^0.12.1",
+    "wasm-pack": "^0.15.0",
     "webpack": "^5.106.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.2.2"
+    "webpack-dev-server": "^5.2.4",
+    "copy-webpack-plugin": "^14.0.0",
+    "html-webpack-plugin": "^5.5.4",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=18.0.0"
