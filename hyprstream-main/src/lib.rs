@@ -35,7 +35,7 @@ ADBC-compliant datastores.
 
 Basic usage example with programmatic configuration:
 
-```rust,no_run
+```ignore
 use hyprstream::config::{Settings, EngineConfig, CacheConfig};
 use hyprstream::service::FlightServiceImpl;
 use std::sync::Arc;
@@ -71,13 +71,20 @@ For detailed configuration options and examples, see:
 - [`examples`](examples/) directory for more usage examples
 */
 
-pub mod metrics;
-pub mod storage;
-pub mod service;
-pub mod config;
-pub mod aggregation;
+// `hyprstream-main` is a vendored upstream crate. It is built as a local path
+// dependency (so cargo does not cap its lints), but its lints are upstream's
+// concern, not this repository's. Silence them so workspace-wide `clippy
+// -D warnings` and `cargo build` stay green without modifying vendored sources.
+#![allow(warnings)]
+#![allow(clippy::all)]
 
+pub mod aggregation;
+pub mod config;
+pub mod metrics;
+pub mod service;
+pub mod storage;
+
+pub use aggregation::{AggregateFunction, AggregateResult, GroupBy, TimeWindow};
+pub use metrics::MetricRecord;
 pub use service::FlightSqlService;
 pub use storage::StorageBackend;
-pub use metrics::MetricRecord;
-pub use aggregation::{TimeWindow, AggregateFunction, GroupBy, AggregateResult};

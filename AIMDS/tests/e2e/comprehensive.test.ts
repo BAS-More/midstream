@@ -172,7 +172,7 @@ aimds_detection_latency_ms_count ${this.requestCount}
   }
 
   private detectKnownThreat(request: DefenseRequest): boolean {
-    const resource = request.action.resource || '';
+    const resource = request?.action?.resource || '';
     return Array.from(this.knownThreats.keys()).some(threat =>
       resource.includes(threat)
     );
@@ -190,7 +190,7 @@ aimds_detection_latency_ms_count ${this.requestCount}
     const variance = this.calculateVariance(sequence);
     const maxChange = this.calculateMaxChange(sequence);
 
-    return variance > 0.5 || maxChange > 0.8;
+    return variance > 0.5 || maxChange >= 0.8;
   }
 
   private calculateVariance(values: number[]): number {
@@ -222,10 +222,19 @@ aimds_detection_latency_ms_count ${this.requestCount}
 describe('AIMDS Comprehensive Integration Tests', () => {
   let gateway: MockAIMDSGateway;
   let request: supertest.SuperTest<supertest.Test>;
+  let server: any;
 
   beforeAll(() => {
     gateway = new MockAIMDSGateway();
-    request = supertest(gateway.getApp());
+    // Listen on a single persistent server so concurrent requests reuse one
+    // listener (supertest(app) spawns an ephemeral server per request, which
+    // exhausts connections and throws ECONNRESET under the throughput test).
+    server = gateway.getApp().listen(0);
+    request = supertest(server);
+  });
+
+  afterAll(() => {
+    if (server) server.close();
   });
 
   describe('1. Fast Path Test (95% of requests)', () => {
