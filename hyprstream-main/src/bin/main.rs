@@ -174,7 +174,6 @@ use hyprstream_core::{
     service::FlightSqlService,
     storage::{adbc::AdbcBackend, duckdb::DuckDbBackend, StorageBackend},
 };
-use std::sync::Arc;
 use tonic::transport::Server;
 
 #[tokio::main]
@@ -203,7 +202,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     engine_backend.init().await?;
 
     // Create cache backend if configured
-    let cache_backend = if settings.cache.enabled {
+    let _cache_backend = if settings.cache.enabled {
         let cache_config = &settings.cache;
         let backend: Box<dyn StorageBackend> = match cache_config.engine.as_str() {
             "adbc" => Box::new(AdbcBackend::new_with_options(
