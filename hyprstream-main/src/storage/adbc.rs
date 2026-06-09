@@ -816,19 +816,11 @@ impl StorageBackend for AdbcBackend {
             let array: ArrayRef = match col.data_type() {
                 DataType::Int64 => {
                     Arc::new(col.as_any().downcast_ref::<Int64Array>().unwrap().clone())
-<<<<<<< fix/security-deps-update
-                },
+                }
                 DataType::Float64 => {
                     Arc::new(col.as_any().downcast_ref::<Float64Array>().unwrap().clone())
-                },
+                }
                 DataType::Utf8 => {
-=======
-                }
-                &duckdb::arrow::datatypes::DataType::Float64 => {
-                    Arc::new(col.as_any().downcast_ref::<Float64Array>().unwrap().clone())
-                }
-                &duckdb::arrow::datatypes::DataType::Utf8 => {
->>>>>>> main
                     Arc::new(col.as_any().downcast_ref::<StringArray>().unwrap().clone())
                 }
                 _ => return Err(Status::internal("Unsupported column type")),
@@ -837,20 +829,6 @@ impl StorageBackend for AdbcBackend {
         }
 
         // Convert DuckDB schema to Arrow schema
-<<<<<<< fix/security-deps-update
-        let fields: Vec<Field> = schema.fields().iter().map(|f| {
-            Field::new(
-                f.name(),
-                match f.data_type() {
-                    DataType::Int64 => DataType::Int64,
-                    DataType::Float64 => DataType::Float64,
-                    DataType::Utf8 => DataType::Utf8,
-                    _ => DataType::Utf8, // Default to string for unsupported types
-                },
-                f.is_nullable()
-            )
-        }).collect();
-=======
         let fields: Vec<Field> = schema
             .fields()
             .iter()
@@ -858,16 +836,15 @@ impl StorageBackend for AdbcBackend {
                 Field::new(
                     f.name(),
                     match f.data_type() {
-                        &duckdb::arrow::datatypes::DataType::Int64 => DataType::Int64,
-                        &duckdb::arrow::datatypes::DataType::Float64 => DataType::Float64,
-                        &duckdb::arrow::datatypes::DataType::Utf8 => DataType::Utf8,
+                        DataType::Int64 => DataType::Int64,
+                        DataType::Float64 => DataType::Float64,
+                        DataType::Utf8 => DataType::Utf8,
                         _ => DataType::Utf8, // Default to string for unsupported types
                     },
                     f.is_nullable(),
                 )
             })
             .collect();
->>>>>>> main
 
         let arrow_schema = Schema::new(fields);
         RecordBatch::try_new(Arc::new(arrow_schema), arrays)
@@ -929,19 +906,11 @@ impl StorageBackend for AdbcBackend {
             let array: ArrayRef = match col.data_type() {
                 DataType::Int64 => {
                     Arc::new(col.as_any().downcast_ref::<Int64Array>().unwrap().clone())
-<<<<<<< fix/security-deps-update
-                },
+                }
                 DataType::Float64 => {
                     Arc::new(col.as_any().downcast_ref::<Float64Array>().unwrap().clone())
-                },
+                }
                 DataType::Utf8 => {
-=======
-                }
-                &duckdb::arrow::datatypes::DataType::Float64 => {
-                    Arc::new(col.as_any().downcast_ref::<Float64Array>().unwrap().clone())
-                }
-                &duckdb::arrow::datatypes::DataType::Utf8 => {
->>>>>>> main
                     Arc::new(col.as_any().downcast_ref::<StringArray>().unwrap().clone())
                 }
                 _ => return Err(Status::internal("Unsupported column type")),
@@ -950,20 +919,6 @@ impl StorageBackend for AdbcBackend {
         }
 
         // Convert DuckDB schema to Arrow schema
-<<<<<<< fix/security-deps-update
-        let fields: Vec<Field> = schema.fields().iter().map(|f| {
-            Field::new(
-                f.name(),
-                match f.data_type() {
-                    DataType::Int64 => DataType::Int64,
-                    DataType::Float64 => DataType::Float64,
-                    DataType::Utf8 => DataType::Utf8,
-                    _ => DataType::Utf8, // Default to string for unsupported types
-                },
-                f.is_nullable()
-            )
-        }).collect();
-=======
         let fields: Vec<Field> = schema
             .fields()
             .iter()
@@ -971,16 +926,15 @@ impl StorageBackend for AdbcBackend {
                 Field::new(
                     f.name(),
                     match f.data_type() {
-                        &duckdb::arrow::datatypes::DataType::Int64 => DataType::Int64,
-                        &duckdb::arrow::datatypes::DataType::Float64 => DataType::Float64,
-                        &duckdb::arrow::datatypes::DataType::Utf8 => DataType::Utf8,
+                        DataType::Int64 => DataType::Int64,
+                        DataType::Float64 => DataType::Float64,
+                        DataType::Utf8 => DataType::Utf8,
                         _ => DataType::Utf8, // Default to string for unsupported types
                     },
                     f.is_nullable(),
                 )
             })
             .collect();
->>>>>>> main
 
         let arrow_schema = Schema::new(fields);
         RecordBatch::try_new(Arc::new(arrow_schema), arrays)
