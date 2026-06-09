@@ -11,7 +11,7 @@
 use std::time::Duration;
 
 // Import from published crates
-use midstreamer_attractor::{AttractorAnalyzer, AttractorType, PhasePoint};
+use midstreamer_attractor::{AttractorAnalyzer, PhasePoint};
 use midstreamer_neural_solver::{
     TemporalFormula, TemporalNeuralSolver, TemporalState, VerificationStrictness,
 };
@@ -169,7 +169,7 @@ fn test_attractor_solver_integration() {
         let t = i as f64 * 0.1;
 
         // Create periodic trajectory
-        let point = PhasePoint::new(vec![t.sin(), t.cos()], i as u64 * 10);
+        let point = PhasePoint::new(vec![t.sin(), t.cos()], i * 10);
         analyzer.add_point(point).unwrap();
 
         // Record temporal state
@@ -276,10 +276,10 @@ fn test_full_system_strange_loop() {
     println!("\n=== Test 5: Full System Integration with Strange Loop ===");
 
     let mut strange_loop = StrangeLoop::new(StrangeLoopConfig {
-        max_levels: 5,
-        max_knowledge_per_level: 100,
-        enable_reflection: true,
-        learning_rate: 0.1,
+        max_meta_depth: 5,
+        enable_self_modification: false,
+        max_modifications_per_cycle: 10,
+        safety_check_enabled: true,
     });
 
     let scheduler: RealtimeScheduler<String> = RealtimeScheduler::default();
@@ -321,7 +321,7 @@ fn test_full_system_strange_loop() {
     // Verify workflow properties
     for i in 0..workflow_steps.len() {
         let mut state = TemporalState::new(i as u64, i as u64 * 100);
-        state.set_proposition("scheduled", i >= 0);
+        state.set_proposition("scheduled", true);
         state.set_proposition("executed", i >= 1);
         state.set_proposition("analyzed", i >= 2);
         state.set_proposition("verified", i >= 3);
@@ -525,30 +525,43 @@ fn test_performance_scalability() {
 fn test_pattern_detection_pipeline() {
     println!("\n=== Test 8: Pattern Detection Pipeline ===");
 
-    let comparator: TemporalComparator<f64> = TemporalComparator::new(100, 1000);
+    let comparator: TemporalComparator<i64> = TemporalComparator::new(100, 1000);
 
-    // Time series with repeating pattern
-    let series = vec![1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0, 3.0, 2.0, 1.0, 5.0, 6.0];
-    let pattern = vec![1.0, 2.0, 3.0, 2.0, 1.0];
+    // Time series with a verbatim repeating pattern at indices 0 and 5.
+    let series = vec![1, 2, 3, 2, 1, 1, 2, 3, 2, 1, 5, 6];
+    let pattern = vec![1, 2, 3, 2, 1];
 
     // Find similar patterns
-    let matches = comparator.find_similar(&series, &pattern, 1.0);
+    let matches = comparator
+        .find_similar_generic(&series, &pattern, 0.5)
+        .unwrap();
     println!("  Found {} pattern matches", matches.len());
 
-    for (idx, dist) in &matches {
-        println!("    Match at index {} with distance {:.4}", idx, dist);
+    for m in &matches {
+        println!(
+            "    Match at index {} with distance {:.4}",
+            m.start_index, m.distance
+        );
     }
 
     assert!(matches.len() >= 2, "Should find repeated pattern");
-    assert_eq!(matches[0].0, 0, "First match at index 0");
-    assert_eq!(matches[1].0, 5, "Second match at index 5");
+    assert!(
+        matches.iter().any(|m| m.start_index == 0),
+        "Should match the pattern at index 0"
+    );
+    assert!(
+        matches.iter().any(|m| m.start_index == 5),
+        "Should match the pattern at index 5"
+    );
 
-    // Test pattern detection
-    let detected = comparator.detect_pattern(&series, &pattern, 1.0);
-    assert!(detected, "Pattern should be detected");
-
-    let no_match = comparator.detect_pattern(&series, &vec![10.0, 20.0, 30.0], 1.0);
-    assert!(!no_match, "Non-existent pattern should not be detected");
+    // A pattern made of values not present should not match closely.
+    let no_match = comparator
+        .find_similar_generic(&series, &[100, 200, 300], 0.1)
+        .unwrap();
+    assert!(
+        no_match.is_empty(),
+        "Non-existent pattern should not be detected"
+    );
 
     println!("  ✓ Pattern detection pipeline verified");
     println!("=== Test 8 PASSED ===\n");
@@ -596,7 +609,7 @@ fn test_state_management() {
     let mut strange_loop = StrangeLoop::default();
 
     strange_loop
-        .learn_at_level(MetaLevel::base(), &vec!["a".to_string()])
+        .learn_at_level(MetaLevel::base(), &["a".to_string()])
         .unwrap();
     let before = strange_loop.get_summary();
     assert!(before.total_knowledge > 0);

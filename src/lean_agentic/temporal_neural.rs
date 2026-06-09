@@ -56,6 +56,7 @@ impl TemporalFormula {
     }
 
     /// Create negation
+    #[allow(clippy::should_implement_trait)]
     pub fn not(formula: TemporalFormula) -> Self {
         TemporalFormula::Not(Box::new(formula))
     }
@@ -99,11 +100,7 @@ impl TemporalFormula {
     }
 
     /// Create bounded eventually (for MTL)
-    pub fn eventually_bounded(
-        formula: TemporalFormula,
-        lower: Duration,
-        upper: Duration,
-    ) -> Self {
+    pub fn eventually_bounded(formula: TemporalFormula, lower: Duration, upper: Duration) -> Self {
         TemporalFormula::BoundedTemporal {
             operator: TemporalOperator::Eventually,
             formula: Box::new(formula),
@@ -113,11 +110,7 @@ impl TemporalFormula {
     }
 
     /// Create bounded globally (for MTL)
-    pub fn globally_bounded(
-        formula: TemporalFormula,
-        lower: Duration,
-        upper: Duration,
-    ) -> Self {
+    pub fn globally_bounded(formula: TemporalFormula, lower: Duration, upper: Duration) -> Self {
         TemporalFormula::BoundedTemporal {
             operator: TemporalOperator::Globally,
             formula: Box::new(formula),
@@ -269,7 +262,11 @@ impl TemporalNeuralSolver {
                             if holds { "true" } else { "false" },
                             position
                         ),
-                        counterexample: if holds { None } else { Some(vec![name.clone()]) },
+                        counterexample: if holds {
+                            None
+                        } else {
+                            Some(vec![name.clone()])
+                        },
                     }
                 } else {
                     VerificationResult {
@@ -402,7 +399,10 @@ impl TemporalNeuralSolver {
                             return VerificationResult {
                                 holds: true,
                                 confidence: result.confidence,
-                                explanation: format!("Eventually at position {}: {}", i, result.explanation),
+                                explanation: format!(
+                                    "Eventually at position {}: {}",
+                                    i, result.explanation
+                                ),
                                 counterexample: None,
                             };
                         }
@@ -417,7 +417,7 @@ impl TemporalNeuralSolver {
 
                 TemporalOperator::Globally => {
                     // G φ: φ holds at all points in the future
-                    let mut min_confidence = 1.0;
+                    let mut min_confidence: f64 = 1.0;
                     for i in position..trace.len() {
                         let result = self.verify_at_position(inner, trace, i);
                         if !result.holds {

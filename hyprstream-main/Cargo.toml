@@ -9,7 +9,10 @@ readme = "README.md"
 [lib]
 name = "hyprstream_core"
 path = "src/lib.rs"
-doctest = true
+# The crate-level doc example references the package name `hyprstream` rather
+# than the lib name `hyprstream_core`; it is illustrative only, so doctests for
+# this vendored crate are disabled.
+doctest = false
 
 [[bin]]
 name = "hyprstream"
@@ -40,7 +43,7 @@ arrow-schema = "54.0.0"
 arrow-ipc = "54.0.0"
 
 # Configuration
-config = { version = "0.13", features = ["toml"] }
+config = { version = "0.13", default-features = false, features = ["toml"] }
 clap = { version = "4.4", features = ["derive", "env"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

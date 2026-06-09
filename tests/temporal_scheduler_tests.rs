@@ -3,8 +3,8 @@
 //! Tests real-world scenarios combining temporal analysis and scheduling
 
 use midstream::{
-    Action, AgentContext, AgenticLoop, ComparisonAlgorithm, LeanAgenticConfig, Priority,
-    RealtimeScheduler, SchedulingPolicy, Sequence, TemporalComparator,
+    Action, ComparisonAlgorithm, Priority, RealtimeScheduler, SchedulingPolicy, Sequence,
+    TemporalComparator,
 };
 use std::collections::HashMap;
 use std::time::Duration;
@@ -81,12 +81,13 @@ async fn test_temporal_action_sequence_analysis() {
         "learn".to_string(),
     ];
 
-    // Anomalous behavior (skips verification)
+    // Anomalous behavior: skips verification and ends with a recovery step,
+    // so it shares most of the workflow but is not a pure subsequence.
     let anomalous_sequence = vec![
         "plan".to_string(),
         "execute".to_string(),
         "observe".to_string(),
-        "learn".to_string(),
+        "rollback".to_string(),
     ];
 
     // Compare sequences
