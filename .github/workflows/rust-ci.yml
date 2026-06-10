@@ -66,6 +66,9 @@ jobs:
             # which was removed in MSVC 14.51+ (VS 2022 18.x). Exclude the root
             # 'midstream' package (which pulls in hyprstream → duckdb) until
             # a version of libduckdb-sys that compiles on modern MSVC is available.
+            # TODO: Remove this exclusion once duckdb/libduckdb-sys ships a bundled
+            # fmt that no longer references stdext::checked_array_iterator.
+            # Track at: https://github.com/duckdb/duckdb-rs/issues
             cargo-exclude: --exclude midstream
 
     steps:
