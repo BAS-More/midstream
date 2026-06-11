@@ -93,7 +93,11 @@ jobs:
         run: cargo test --workspace --all-features --lib --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run integration tests
-        if: ${{ !matrix.cargo-exclude }}
+        # Integration tests only exist in the root `midstream` package.
+        # On Windows, `midstream` is excluded (DuckDB/MSVC incompatibility), so
+        # there are no integration test targets in the remaining crates and
+        # `--test '*'` would error with "no test target matches pattern".
+        if: matrix.os != 'windows-latest'
         run: cargo test --workspace --all-features --test '*' --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run doc tests
