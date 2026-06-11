@@ -93,6 +93,7 @@ jobs:
         run: cargo test --workspace --all-features --lib --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run integration tests
+        if: ${{ !matrix.cargo-exclude }}
         run: cargo test --workspace --all-features --test '*' --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run doc tests
