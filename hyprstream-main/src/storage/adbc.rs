@@ -814,13 +814,13 @@ impl StorageBackend for AdbcBackend {
         for i in 0..batch.num_columns() {
             let col = batch.column(i);
             let array: ArrayRef = match col.data_type() {
-                &duckdb::arrow::datatypes::DataType::Int64 => {
+                DataType::Int64 => {
                     Arc::new(col.as_any().downcast_ref::<Int64Array>().unwrap().clone())
                 }
-                &duckdb::arrow::datatypes::DataType::Float64 => {
+                DataType::Float64 => {
                     Arc::new(col.as_any().downcast_ref::<Float64Array>().unwrap().clone())
                 }
-                &duckdb::arrow::datatypes::DataType::Utf8 => {
+                DataType::Utf8 => {
                     Arc::new(col.as_any().downcast_ref::<StringArray>().unwrap().clone())
                 }
                 _ => return Err(Status::internal("Unsupported column type")),
@@ -836,9 +836,9 @@ impl StorageBackend for AdbcBackend {
                 Field::new(
                     f.name(),
                     match f.data_type() {
-                        &duckdb::arrow::datatypes::DataType::Int64 => DataType::Int64,
-                        &duckdb::arrow::datatypes::DataType::Float64 => DataType::Float64,
-                        &duckdb::arrow::datatypes::DataType::Utf8 => DataType::Utf8,
+                        DataType::Int64 => DataType::Int64,
+                        DataType::Float64 => DataType::Float64,
+                        DataType::Utf8 => DataType::Utf8,
                         _ => DataType::Utf8, // Default to string for unsupported types
                     },
                     f.is_nullable(),
@@ -904,13 +904,13 @@ impl StorageBackend for AdbcBackend {
         for i in 0..batch.num_columns() {
             let col = batch.column(i);
             let array: ArrayRef = match col.data_type() {
-                &duckdb::arrow::datatypes::DataType::Int64 => {
+                DataType::Int64 => {
                     Arc::new(col.as_any().downcast_ref::<Int64Array>().unwrap().clone())
                 }
-                &duckdb::arrow::datatypes::DataType::Float64 => {
+                DataType::Float64 => {
                     Arc::new(col.as_any().downcast_ref::<Float64Array>().unwrap().clone())
                 }
-                &duckdb::arrow::datatypes::DataType::Utf8 => {
+                DataType::Utf8 => {
                     Arc::new(col.as_any().downcast_ref::<StringArray>().unwrap().clone())
                 }
                 _ => return Err(Status::internal("Unsupported column type")),
@@ -926,9 +926,9 @@ impl StorageBackend for AdbcBackend {
                 Field::new(
                     f.name(),
                     match f.data_type() {
-                        &duckdb::arrow::datatypes::DataType::Int64 => DataType::Int64,
-                        &duckdb::arrow::datatypes::DataType::Float64 => DataType::Float64,
-                        &duckdb::arrow::datatypes::DataType::Utf8 => DataType::Utf8,
+                        DataType::Int64 => DataType::Int64,
+                        DataType::Float64 => DataType::Float64,
+                        DataType::Utf8 => DataType::Utf8,
                         _ => DataType::Utf8, // Default to string for unsupported types
                     },
                     f.is_nullable(),
