@@ -31,7 +31,7 @@ tokio-rustls = "0.26.1"
 tonic = { version = "0.12.3", features = ["transport", "codegen", "prost"] }
 async-trait = "0.1"
 sqlparser = "0.39.0"
-adbc_core = { version = "0.15.0", features = ["driver_manager"] }
+adbc_core = { version = "0.17.0", features = ["driver_manager"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
 lazy_static = "1.4"
