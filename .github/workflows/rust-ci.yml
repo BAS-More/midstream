@@ -62,7 +62,15 @@ jobs:
             target: x86_64-apple-darwin
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            cargo-exclude: "--exclude midstream --exclude hyprstream"
+            # libduckdb-sys (bundled DuckDB C++) uses stdext::checked_array_iterator
+            # which was removed in MSVC 14.51+ (VS 2022 18.x). Exclude both the
+            # root 'midstream' package and the direct workspace member
+            # 'hyprstream' (which depends on duckdb) until a version of
+            # libduckdb-sys that compiles on modern MSVC is available.
+            # TODO: Remove this exclusion once duckdb/libduckdb-sys ships a bundled
+            # fmt that no longer references stdext::checked_array_iterator.
+            # Track at: https://github.com/duckdb/duckdb-rs/issues
+            cargo-exclude: --exclude midstream --exclude hyprstream
 
     steps:
       - uses: actions/checkout@v4
@@ -79,17 +87,21 @@ jobs:
           shared-key: "test-${{ matrix.os }}-${{ matrix.rust }}"
 
       - name: Build workspace
-        run: cargo build --workspace --all-features ${{ matrix.cargo-exclude }} --verbose
+        run: cargo build --workspace --all-features --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run unit tests
-        run: cargo test --workspace --all-features ${{ matrix.cargo-exclude }} --lib --verbose
+        run: cargo test --workspace --all-features --lib --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run integration tests
+        # Integration tests only exist in the root `midstream` package.
+        # On Windows, `midstream` is excluded (DuckDB/MSVC incompatibility), so
+        # there are no integration test targets in the remaining crates and
+        # `--test '*'` would error with "no test target matches pattern".
         if: matrix.os != 'windows-latest'
-        run: cargo test --workspace --all-features --test '*' --verbose
+        run: cargo test --workspace --all-features --test '*' --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run doc tests
-        run: cargo test --workspace --all-features ${{ matrix.cargo-exclude }} --doc --verbose
+        run: cargo test --workspace --all-features --doc --verbose ${{ matrix.cargo-exclude }}
 
   # Individual crate builds
   build-crates:
@@ -103,6 +115,7 @@ jobs:
           - midstreamer-attractor
           - midstreamer-neural-solver
           - midstreamer-strange-loop
+          - midstreamer-quic
 
     steps:
       - uses: actions/checkout@v4
