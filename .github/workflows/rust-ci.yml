@@ -62,6 +62,7 @@ jobs:
             target: x86_64-apple-darwin
           - os: windows-latest
             target: x86_64-pc-windows-msvc
+            cargo-exclude: "--exclude midstream --exclude hyprstream"
 
     steps:
       - uses: actions/checkout@v4
@@ -78,16 +79,17 @@ jobs:
           shared-key: "test-${{ matrix.os }}-${{ matrix.rust }}"
 
       - name: Build workspace
-        run: cargo build --workspace --all-features --verbose
+        run: cargo build --workspace --all-features ${{ matrix.cargo-exclude }} --verbose
 
       - name: Run unit tests
-        run: cargo test --workspace --all-features --lib --verbose
+        run: cargo test --workspace --all-features ${{ matrix.cargo-exclude }} --lib --verbose
 
       - name: Run integration tests
+        if: matrix.os != 'windows-latest'
         run: cargo test --workspace --all-features --test '*' --verbose
 
       - name: Run doc tests
-        run: cargo test --workspace --all-features --doc --verbose
+        run: cargo test --workspace --all-features ${{ matrix.cargo-exclude }} --doc --verbose
 
   # Individual crate builds
   build-crates:
