@@ -115,6 +115,7 @@ jobs:
           - midstreamer-attractor
           - midstreamer-neural-solver
           - midstreamer-strange-loop
+          - midstreamer-quic
 
     steps:
       - uses: actions/checkout@v4
