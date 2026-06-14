@@ -27,7 +27,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.22.1",
+    "express": "^5.2.1",
     "agentdb": "^1.6.1",
     "lean-agentic": "^0.3.2",
     "prom-client": "^15.1.0",
