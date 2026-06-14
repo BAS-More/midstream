@@ -22,5 +22,18 @@ uuid.workspace = true
 derive_more = "0.99"
 validator = { version = "0.18", features = ["derive"] }
 
+# WASM dependencies (optional)
+wasm-bindgen = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+console_error_panic_hook = { workspace = true, optional = true }
+serde-wasm-bindgen = { workspace = true, optional = true }
+
 [dev-dependencies]
 proptest.workspace = true
+
+[lib]
+crate-type = ["rlib"]
+
+[features]
+default = []
+wasm = ["wasm-bindgen", "js-sys", "console_error_panic_hook", "serde-wasm-bindgen"]
