@@ -9,32 +9,34 @@
 //!
 //! Run with: cargo run --example lean_agentic_streaming
 
+use bytes::Bytes;
 use futures::stream::{iter, BoxStream};
 use midstream::{
     AgentContext, HyprServiceImpl, HyprSettings, LLMClient, LeanAgenticConfig, LeanAgenticSystem,
     Midstream, StreamProcessor,
 };
+use tokio;
 
 /// Example LLM client that simulates streaming responses
 struct SimulatedLLMClient {
-    messages: Vec<String>,
+    messages: Vec<Bytes>,
 }
 
 impl SimulatedLLMClient {
     fn new() -> Self {
         Self {
             messages: vec![
-                "Hello! I can help you with weather information.".to_string(),
-                "Let me learn your preferences.".to_string(),
-                "What would you like to know?".to_string(),
-                "I'm getting better at understanding you!".to_string(),
+                Bytes::from_static(b"Hello! I can help you with weather information."),
+                Bytes::from_static(b"Let me learn your preferences."),
+                Bytes::from_static(b"What would you like to know?"),
+                Bytes::from_static(b"I'm getting better at understanding you!"),
             ],
         }
     }
 }
 
 impl LLMClient for SimulatedLLMClient {
-    fn stream(&self) -> BoxStream<'static, String> {
+    fn stream(&self) -> BoxStream<'static, Bytes> {
         Box::pin(iter(self.messages.clone()))
     }
 }
@@ -76,11 +78,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut context = AgentContext::new("session_001".to_string());
 
     for (i, msg) in messages.iter().enumerate() {
-        println!("  Message #{}: {}", i + 1, msg.content);
+        // Lift the chunk's bytes to UTF-8 for downstream APIs that still
+        // expect &str / String. The Bytes handle itself remains zero-copy
+        // inside the streaming pipeline; this allocation is example-only.
+        let chunk = msg.content_str();
+        println!("  Message #{}: {}", i + 1, chunk);
 
         // Process with lean agentic system
         let result = lean_system
-            .process_stream_chunk(&msg.content, context.clone())
+            .process_stream_chunk(&chunk, context.clone())
             .await?;
 
         println!("    → Action: {}", result.action.description);
@@ -91,7 +97,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         // Update context
-        context.add_message(msg.content.clone());
+        context.add_message(chunk.into_owned());
         println!();
     }
 

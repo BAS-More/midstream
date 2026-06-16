@@ -1,5 +1,6 @@
 //! Agentic loop for autonomous decision-making (Plan-Act-Observe-Learn)
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

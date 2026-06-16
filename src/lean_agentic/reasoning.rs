@@ -1,7 +1,8 @@
 //! Formal reasoning engine inspired by Lean theorem proving
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::agent::Action;
 use super::types::Context;
@@ -109,14 +110,8 @@ impl FormalReasoner {
             confidence: self.verify_outcomes(action).await,
         });
 
-        // Compute overall validity as the mean step confidence. Averaging (rather
-        // than multiplying) keeps the score well-calibrated as more verification
-        // steps are added, instead of decaying toward zero.
-        proof.confidence = if proof.steps.is_empty() {
-            0.0
-        } else {
-            proof.steps.iter().map(|s| s.confidence).sum::<f64>() / proof.steps.len() as f64
-        };
+        // Compute overall validity
+        proof.confidence = proof.steps.iter().map(|s| s.confidence).product::<f64>();
 
         proof.valid = proof.confidence > 0.5;
 

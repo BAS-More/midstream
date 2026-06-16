@@ -220,7 +220,7 @@ fn safety_constraint_checking_benchmark(c: &mut Criterion) {
             BenchmarkId::from_parameter(num_constraints),
             num_constraints,
             |b, &num_constraints| {
-                let mut config = StrangeLoopConfig {
+                let config = StrangeLoopConfig {
                     max_meta_depth: 2,
                     enable_self_modification: true,
                     max_modifications_per_cycle: 100,

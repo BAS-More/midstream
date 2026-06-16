@@ -1,3 +1,4 @@
+use bytes::Bytes;
 use dotenvy::dotenv;
 use eventsource_stream::Eventsource;
 use futures::stream::{BoxStream, StreamExt};
@@ -21,7 +22,7 @@ impl OpenRouterClient {
 }
 
 impl LLMClient for OpenRouterClient {
-    fn stream(&self) -> BoxStream<'static, String> {
+    fn stream(&self) -> BoxStream<'static, Bytes> {
         let prompt = "Tell me a short story about a robot learning to paint. Make it emotional and stream it word by word.".to_string();
         let client = self.client.clone();
         let api_key = self.api_key.clone();
@@ -91,8 +92,11 @@ impl LLMClient for OpenRouterClient {
                 });
 
             while let Some(s) = stream.next().await {
-                if !s.is_empty() {
-                    yield s.trim().to_string();
+                let trimmed = s.trim();
+                if !trimmed.is_empty() {
+                    // One allocation per non-empty token; the resulting Bytes
+                    // flows through the pipeline by Arc-clone after this point.
+                    yield Bytes::copy_from_slice(trimmed.as_bytes());
                 }
             }
         })
@@ -127,7 +131,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\nFinal story:");
     for msg in &messages {
-        print!("{}", msg.content);
+        print!("{}", msg.content_str());
     }
     println!("\n");
 

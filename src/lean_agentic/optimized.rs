@@ -8,7 +8,8 @@
 //! - Batch processing
 
 use super::agent::Action;
-use super::knowledge::EntityType;
+use super::types::*;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 

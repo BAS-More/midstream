@@ -195,7 +195,11 @@ impl AttractorAnalyzer {
         // In production, this would use more sophisticated methods
         let points: Vec<&PhasePoint> = self.trajectory.points.iter().collect();
 
-        for (dim, exponent) in exponents.iter_mut().enumerate() {
+        // Dimension loop reads naturally with an integer index; the
+        // iter_mut().enumerate() rewrite suggested by clippy would
+        // require a separate accumulator and obscure the algorithm.
+        #[allow(clippy::needless_range_loop)]
+        for dim in 0..self.embedding_dimension {
             let mut sum_log_divergence = 0.0;
             let mut count = 0;
 

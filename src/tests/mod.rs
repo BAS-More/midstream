@@ -1,11 +1,10 @@
 #[cfg(test)]
-#[allow(clippy::module_inception)]
-mod tests {
+mod unit {
     use crate::midstream::{
         AggregateFunction, HyprService, Intent, LLMClient, MetricRecord, Midstream,
         StreamProcessor, TimeWindow, ToolIntegration,
     };
-    use async_trait::async_trait;
+    use bytes::Bytes;
     use futures::stream::{self, BoxStream};
     use mockall::*;
     use std::time::Duration;
@@ -15,13 +14,13 @@ mod tests {
     mock! {
         pub LLMClient {}
         impl LLMClient for LLMClient {
-            fn stream(&self) -> BoxStream<'static, String>;
+            fn stream(&self) -> BoxStream<'static, Bytes>;
         }
     }
 
     mock! {
         pub HyprService {}
-        #[async_trait]
+        #[async_trait::async_trait]
         impl HyprService for HyprService {
             async fn ingest_metric(&self, metric: MetricRecord) -> Result<(), BoxError>;
             async fn query_aggregate(&self, window: TimeWindow, func: AggregateFunction) -> Result<f64, BoxError>;
@@ -43,9 +42,9 @@ mod tests {
 
         mock_llm.expect_stream().times(1).return_once(move || {
             Box::pin(stream::iter(vec![
-                "Process".to_string(),
-                "this".to_string(),
-                "stream".to_string(),
+                Bytes::from_static(b"Process"),
+                Bytes::from_static(b"this"),
+                Bytes::from_static(b"stream"),
             ]))
         });
 
@@ -92,7 +91,7 @@ mod tests {
         mock_llm
             .expect_stream()
             .times(1)
-            .return_once(|| Box::pin(stream::iter(vec!["test message".to_string()])));
+            .return_once(|| Box::pin(stream::iter(vec![Bytes::from_static(b"test message")])));
 
         let midstream = Midstream::new(Box::new(mock_llm), Box::new(mock_hypr));
 
@@ -112,7 +111,7 @@ mod tests {
         mock_llm
             .expect_stream()
             .times(1)
-            .return_once(|| Box::pin(stream::iter(Vec::<String>::new())));
+            .return_once(|| Box::pin(stream::iter(Vec::<Bytes>::new())));
 
         let midstream = Midstream::new(Box::new(mock_llm), Box::new(mock_hypr));
 
@@ -126,11 +125,11 @@ mod tests {
         let mut mock_llm = MockLLMClient::new();
         let mut mock_hypr = MockHyprService::new();
 
-        let large_message = "x".repeat(1_000_000);
+        let large_message = Bytes::from(vec![b'x'; 1_000_000]);
         mock_llm
             .expect_stream()
             .times(1)
-            .return_once(move || Box::pin(stream::iter(vec![large_message.clone()])));
+            .return_once(move || Box::pin(stream::iter(vec![large_message])));
 
         mock_hypr.expect_ingest_metric().returning(|_| Ok(()));
 
@@ -150,10 +149,11 @@ mod tests {
         let mut mock_hypr = MockHyprService::new();
         let mut mock_tool = MockToolClient::new();
 
-        mock_llm
-            .expect_stream()
-            .times(1)
-            .return_once(|| Box::pin(stream::iter(vec!["URGENT: What's the weather".to_string()])));
+        mock_llm.expect_stream().times(1).return_once(|| {
+            Box::pin(stream::iter(vec![Bytes::from_static(
+                b"URGENT: What's the weather",
+            )]))
+        });
 
         mock_tool
             .expect_handle_weather_intent()
@@ -188,7 +188,7 @@ mod tests {
         mock_llm
             .expect_stream()
             .times(1)
-            .return_once(|| Box::pin(stream::iter(vec!["".to_string()])));
+            .return_once(|| Box::pin(stream::iter(vec![Bytes::new()])));
 
         let midstream = Midstream::new(Box::new(mock_llm), Box::new(mock_hypr));
 
