@@ -1,11 +1,19 @@
 #[cfg(test)]
+<<<<<<< HEAD
 #[allow(clippy::module_inception)]
 mod tests {
+=======
+mod unit {
+>>>>>>> ruvnet/main
     use crate::midstream::{
         AggregateFunction, HyprService, Intent, LLMClient, MetricRecord, Midstream,
         StreamProcessor, TimeWindow, ToolIntegration,
     };
+<<<<<<< HEAD
     use async_trait::async_trait;
+=======
+    use bytes::Bytes;
+>>>>>>> ruvnet/main
     use futures::stream::{self, BoxStream};
     use mockall::*;
     use std::time::Duration;
@@ -15,13 +23,17 @@ mod tests {
     mock! {
         pub LLMClient {}
         impl LLMClient for LLMClient {
-            fn stream(&self) -> BoxStream<'static, String>;
+            fn stream(&self) -> BoxStream<'static, Bytes>;
         }
     }
 
     mock! {
         pub HyprService {}
+<<<<<<< HEAD
         #[async_trait]
+=======
+        #[async_trait::async_trait]
+>>>>>>> ruvnet/main
         impl HyprService for HyprService {
             async fn ingest_metric(&self, metric: MetricRecord) -> Result<(), BoxError>;
             async fn query_aggregate(&self, window: TimeWindow, func: AggregateFunction) -> Result<f64, BoxError>;
@@ -43,9 +55,15 @@ mod tests {
 
         mock_llm.expect_stream().times(1).return_once(move || {
             Box::pin(stream::iter(vec![
+<<<<<<< HEAD
                 "Process".to_string(),
                 "this".to_string(),
                 "stream".to_string(),
+=======
+                Bytes::from_static(b"Process"),
+                Bytes::from_static(b"this"),
+                Bytes::from_static(b"stream"),
+>>>>>>> ruvnet/main
             ]))
         });
 
@@ -92,7 +110,11 @@ mod tests {
         mock_llm
             .expect_stream()
             .times(1)
+<<<<<<< HEAD
             .return_once(|| Box::pin(stream::iter(vec!["test message".to_string()])));
+=======
+            .return_once(|| Box::pin(stream::iter(vec![Bytes::from_static(b"test message")])));
+>>>>>>> ruvnet/main
 
         let midstream = Midstream::new(Box::new(mock_llm), Box::new(mock_hypr));
 
@@ -112,7 +134,11 @@ mod tests {
         mock_llm
             .expect_stream()
             .times(1)
+<<<<<<< HEAD
             .return_once(|| Box::pin(stream::iter(Vec::<String>::new())));
+=======
+            .return_once(|| Box::pin(stream::iter(Vec::<Bytes>::new())));
+>>>>>>> ruvnet/main
 
         let midstream = Midstream::new(Box::new(mock_llm), Box::new(mock_hypr));
 
@@ -126,11 +152,19 @@ mod tests {
         let mut mock_llm = MockLLMClient::new();
         let mut mock_hypr = MockHyprService::new();
 
+<<<<<<< HEAD
         let large_message = "x".repeat(1_000_000);
         mock_llm
             .expect_stream()
             .times(1)
             .return_once(move || Box::pin(stream::iter(vec![large_message.clone()])));
+=======
+        let large_message = Bytes::from(vec![b'x'; 1_000_000]);
+        mock_llm
+            .expect_stream()
+            .times(1)
+            .return_once(move || Box::pin(stream::iter(vec![large_message])));
+>>>>>>> ruvnet/main
 
         mock_hypr.expect_ingest_metric().returning(|_| Ok(()));
 
@@ -150,10 +184,18 @@ mod tests {
         let mut mock_hypr = MockHyprService::new();
         let mut mock_tool = MockToolClient::new();
 
+<<<<<<< HEAD
         mock_llm
             .expect_stream()
             .times(1)
             .return_once(|| Box::pin(stream::iter(vec!["URGENT: What's the weather".to_string()])));
+=======
+        mock_llm.expect_stream().times(1).return_once(|| {
+            Box::pin(stream::iter(vec![Bytes::from_static(
+                b"URGENT: What's the weather",
+            )]))
+        });
+>>>>>>> ruvnet/main
 
         mock_tool
             .expect_handle_weather_intent()
@@ -188,7 +230,11 @@ mod tests {
         mock_llm
             .expect_stream()
             .times(1)
+<<<<<<< HEAD
             .return_once(|| Box::pin(stream::iter(vec!["".to_string()])));
+=======
+            .return_once(|| Box::pin(stream::iter(vec![Bytes::new()])));
+>>>>>>> ruvnet/main
 
         let midstream = Midstream::new(Box::new(mock_llm), Box::new(mock_hypr));
 

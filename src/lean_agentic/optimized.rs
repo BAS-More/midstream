@@ -8,7 +8,12 @@
 //! - Batch processing
 
 use super::agent::Action;
+<<<<<<< HEAD
 use super::knowledge::EntityType;
+=======
+use super::types::*;
+use serde::{Deserialize, Serialize};
+>>>>>>> ruvnet/main
 use std::collections::HashMap;
 use std::sync::Arc;
 

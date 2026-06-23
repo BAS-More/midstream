@@ -1,5 +1,6 @@
 //! Stream learning and online adaptation
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 
@@ -69,7 +70,11 @@ impl StreamLearner {
                     .await?;
             }
             AdaptationStrategy::Batched { batch_size } => {
+<<<<<<< HEAD
                 if self.iterations.is_multiple_of(*batch_size) {
+=======
+                if self.iterations % batch_size == 0 {
+>>>>>>> ruvnet/main
                     self.model
                         .update_batch(&self.experience_buffer, self.learning_rate)
                         .await?;
@@ -226,7 +231,14 @@ impl OnlineModel {
             *weight += learning_rate * error * value;
 
             // Update feature statistics
+<<<<<<< HEAD
             let stats = self.feature_stats.entry(feature).or_default();
+=======
+            let stats = self
+                .feature_stats
+                .entry(feature)
+                .or_insert(FeatureStats::default());
+>>>>>>> ruvnet/main
             stats.update(value);
         }
 

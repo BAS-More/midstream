@@ -48,7 +48,11 @@ pub use attractor::{
     AttractorAnalyzer, AttractorInfo, AttractorType, BehaviorAttractorAnalyzer, BehaviorSummary,
     PhasePoint, Trajectory,
 };
+<<<<<<< HEAD
 pub use knowledge::{Entity, EntityType, KnowledgeGraph, Relation};
+=======
+pub use knowledge::{Entity, KnowledgeGraph, Relation, TheoremStore};
+>>>>>>> ruvnet/main
 pub use learning::{AdaptationStrategy, OnlineModel, StreamLearner};
 pub use midstreamer_strange_loop::{
     MetaKnowledge, MetaLearner, MetaLearningSummary, MetaLevel, ModificationRule, SafetyConstraint,

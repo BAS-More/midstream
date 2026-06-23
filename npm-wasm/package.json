@@ -1,14 +1,18 @@
 {
-  "name": "@midstream/wasm",
-  "version": "1.0.0",
-  "description": "WebAssembly bindings for Midstream temporal comparison, scheduling, and meta-learning",
+  "name": "midstreamer",
+  "version": "0.3.1",
+  "description": "WebAssembly bindings for Midstream temporal comparison, scheduling, and meta-learning + real QUIC transport via agentic-flow",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "types/index.d.ts",
   "files": [
-    "dist",
-    "types",
-    "README.md"
+    "pkg",
+    "pkg-node",
+    "pkg-bundler",
+    "README.md",
+    "QUICK_START.md",
+    "PACKAGE_SUMMARY.md",
+    "quic.js"
   ],
   "scripts": {
     "build:wasm": "wasm-pack build --target web --out-dir pkg",
@@ -41,17 +45,27 @@
     "performance"
   ],
   "author": "Midstream Contributors",
-  "license": "MIT",
+  "license": "(MIT OR Apache-2.0)",
   "dependencies": {
-    "@peculiar/webcrypto": "^1.4.3"
+    "@peculiar/webcrypto": "^1.4.3",
+    "agentic-flow": "2.0.12-fix.8"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "wasm-pack": "^0.15.0",
     "webpack": "^5.106.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.4",
     "copy-webpack-plugin": "^14.0.0",
     "html-webpack-plugin": "^5.5.4",
+=======
+    "wasm-pack": "^0.12.1",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "copy-webpack-plugin": "^11.0.0",
+    "html-webpack-plugin": "^5.6.7",
+>>>>>>> ruvnet/main
     "typescript": "^5.3.3"
   },
   "engines": {
@@ -59,5 +73,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    "./quic": "./quic.js",
+    "./package.json": "./package.json"
   }
 }

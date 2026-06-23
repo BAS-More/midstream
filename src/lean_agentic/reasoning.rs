@@ -1,7 +1,12 @@
 //! Formal reasoning engine inspired by Lean theorem proving
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+<<<<<<< HEAD
 use std::collections::HashMap;
+=======
+use std::collections::{HashMap, HashSet};
+>>>>>>> ruvnet/main
 
 use super::agent::Action;
 use super::types::Context;
@@ -109,6 +114,7 @@ impl FormalReasoner {
             confidence: self.verify_outcomes(action).await,
         });
 
+<<<<<<< HEAD
         // Compute overall validity as the mean step confidence. Averaging (rather
         // than multiplying) keeps the score well-calibrated as more verification
         // steps are added, instead of decaying toward zero.
@@ -117,6 +123,10 @@ impl FormalReasoner {
         } else {
             proof.steps.iter().map(|s| s.confidence).sum::<f64>() / proof.steps.len() as f64
         };
+=======
+        // Compute overall validity
+        proof.confidence = proof.steps.iter().map(|s| s.confidence).product::<f64>();
+>>>>>>> ruvnet/main
 
         proof.valid = proof.confidence > 0.5;
 

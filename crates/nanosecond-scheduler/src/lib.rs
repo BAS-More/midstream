@@ -133,8 +133,30 @@ impl<T> PartialOrd for ScheduledTask<T> {
 
 impl<T> Ord for ScheduledTask<T> {
     fn cmp(&self, other: &Self) -> Ordering {
+<<<<<<< HEAD
         // `BinaryHeap` is a max-heap, so the "greatest" task is dequeued first.
         // Higher priority first, then earlier deadline first.
+=======
+        // Higher priority first, earlier deadline first.
+        //
+        // `RealtimeScheduler` stores tasks in a `BinaryHeap` (max-heap)
+        // and pops via `BinaryHeap::pop`, which returns the greatest
+        // element by this `Ord` impl. So "Critical pops first" means
+        // `Critical > Background` in this comparison.
+        //
+        // Priority's derived `Ord` compares by discriminant value
+        // (Critical=100, ..., Background=10), so `Critical.cmp(&Background)
+        // = Greater`. We therefore want `self.priority.cmp(&other.priority)`
+        // *without* inversion — historical drafts swapped this and
+        // produced the exact opposite (lower-priority popping first);
+        // see PR #59's proptest counterexamples for the discovery
+        // story.
+        //
+        // The deadline tie-break is the opposite shape: in the
+        // max-heap, the LATER deadline is "greater" by default, but
+        // we want EARLIER deadlines first. So we *do* swap the
+        // deadline comparison.
+>>>>>>> ruvnet/main
         self.priority.cmp(&other.priority).then_with(|| {
             other
                 .deadline
