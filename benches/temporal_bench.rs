@@ -1,45 +1,47 @@
-//! Benchmarks for the `temporal-compare` crate.
+//! Comprehensive benchmarks for temporal-compare crate
 //!
-//! Exercises the public `TemporalComparator` API across the available
-//! comparison algorithms.
+//! Benchmarks cover:
+//! - DTW (Dynamic Time Warping) performance across various sequence lengths
+//! - LCS (Longest Common Subsequence) performance
+//! - Edit distance calculations
+//! - Cache hit/miss scenarios
+//! - Memory allocation patterns
+//!
+//! Performance targets:
+//! - DTW n=100: <10ms
+//! - LCS n=100: <5ms
+//! - Edit distance n=100: <3ms
 
-<<<<<<< HEAD
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use midstreamer_temporal_compare::{ComparisonAlgorithm, Sequence, TemporalComparator};
-=======
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use midstreamer_temporal_compare::{
     dtw::dtw_distance, edit::edit_distance, lcs::longest_common_subsequence, CachedCompare,
     TemporalCompare, TemporalData, TemporalPattern,
 };
->>>>>>> ruvnet/main
 
-fn make_sequence(len: usize, offset: i64) -> Sequence<i64> {
-    let mut seq = Sequence::new();
-    for i in 0..len {
-        seq.push(i as i64 + offset, i as u64);
+// ============================================================================
+// Test Data Generation
+// ============================================================================
+
+fn generate_sequence(len: usize, pattern: &str) -> Vec<f64> {
+    match pattern {
+        "linear" => (0..len).map(|i| i as f64).collect(),
+        "sine" => (0..len).map(|i| (i as f64 * 0.1).sin()).collect(),
+        "random" => (0..len).map(|i| (i as f64 * 7919.0) % 100.0).collect(),
+        "stepped" => (0..len).map(|i| (i / 10) as f64).collect(),
+        _ => vec![0.0; len],
     }
-    seq
 }
 
-fn bench_algorithms(c: &mut Criterion) {
-    let comparator = TemporalComparator::<i64>::new(1024, 10_000);
-    let seq_a = make_sequence(100, 0);
-    let seq_b = make_sequence(100, 1);
+fn generate_similar_sequence(base: &[f64], similarity: f64) -> Vec<f64> {
+    base.iter()
+        .enumerate()
+        .map(|(i, &x)| {
+            let noise = ((i as f64 * 31.0) % 1.0 - 0.5) * 2.0;
+            x + noise * (1.0 - similarity)
+        })
+        .collect()
+}
 
-<<<<<<< HEAD
-    let mut group = c.benchmark_group("temporal_compare");
-    for algorithm in [
-        ComparisonAlgorithm::DTW,
-        ComparisonAlgorithm::LCS,
-        ComparisonAlgorithm::EditDistance,
-        ComparisonAlgorithm::Euclidean,
-    ] {
-        group.bench_function(format!("{algorithm:?}"), |b| {
-            b.iter(|| {
-                black_box(comparator.compare(black_box(&seq_a), black_box(&seq_b), algorithm))
-            });
-=======
 fn generate_string_sequence(len: usize, alphabet_size: usize) -> Vec<char> {
     (0..len)
         .map(|i| {
@@ -78,16 +80,12 @@ fn bench_dtw_various_sizes(c: &mut Criterion) {
             let seq1 = generate_sequence(size, "random");
             let seq2 = generate_sequence(size, "random");
             b.iter(|| black_box(dtw_distance(black_box(&seq1), black_box(&seq2))));
->>>>>>> ruvnet/main
         });
     }
+
     group.finish();
 }
 
-<<<<<<< HEAD
-criterion_group!(benches, bench_algorithms);
-criterion_main!(benches);
-=======
 fn bench_dtw_similarity_variations(c: &mut Criterion) {
     let mut group = c.benchmark_group("dtw_similarity");
 
@@ -361,4 +359,3 @@ criterion_main!(
     cache_benches,
     memory_benches
 );
->>>>>>> ruvnet/main

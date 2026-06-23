@@ -60,8 +60,6 @@
 
 pub mod config;
 pub mod hypr_service;
-<<<<<<< HEAD
-=======
 pub mod midstream;
 pub mod tests;
 
@@ -71,18 +69,13 @@ pub mod tests;
 // dedup refactor lands; consumers wanting the old API still build with
 // `--features lean-agentic` and accept the broken-build risk.
 #[cfg(feature = "lean-agentic")]
->>>>>>> ruvnet/main
 pub mod lean_agentic;
-pub mod midstream;
-pub mod tests;
 
 pub use config::HyprSettings;
 pub use hypr_service::HyprServiceImpl;
 pub use midstream::{
     AggregateFunction, HyprService, Intent, LLMClient, LLMMessage, MetricRecord, Midstream,
     StreamProcessor, TimeWindow, ToolIntegration,
-<<<<<<< HEAD
-=======
 };
 
 // Lean Agentic Learning System exports — gated behind the same feature.
@@ -93,11 +86,4 @@ pub use lean_agentic::{
     Action, AdaptationStrategy, AgentState, AgenticLoop, Context as AgentContext, Entity,
     FormalReasoner, KnowledgeGraph, LeanAgenticConfig, LeanAgenticSystem, LearningSignal,
     Observation, OnlineModel, Plan, Proof, ProofStep, Relation, Reward, StreamLearner, Theorem,
->>>>>>> ruvnet/main
 };
-
-// Lean Agentic Learning System exports.
-// Re-export the full public surface of the `lean_agentic` module at the crate
-// root (plus the conventional `AgentContext` alias for `Context`).
-pub use lean_agentic::Context as AgentContext;
-pub use lean_agentic::*;

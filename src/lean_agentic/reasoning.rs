@@ -2,11 +2,7 @@
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-<<<<<<< HEAD
-use std::collections::HashMap;
-=======
 use std::collections::{HashMap, HashSet};
->>>>>>> ruvnet/main
 
 use super::agent::Action;
 use super::types::Context;
@@ -21,12 +17,6 @@ pub struct FormalReasoner {
 
     /// Proof cache for performance
     proof_cache: HashMap<String, Proof>,
-}
-
-impl Default for FormalReasoner {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl FormalReasoner {
@@ -114,19 +104,8 @@ impl FormalReasoner {
             confidence: self.verify_outcomes(action).await,
         });
 
-<<<<<<< HEAD
-        // Compute overall validity as the mean step confidence. Averaging (rather
-        // than multiplying) keeps the score well-calibrated as more verification
-        // steps are added, instead of decaying toward zero.
-        proof.confidence = if proof.steps.is_empty() {
-            0.0
-        } else {
-            proof.steps.iter().map(|s| s.confidence).sum::<f64>() / proof.steps.len() as f64
-        };
-=======
         // Compute overall validity
         proof.confidence = proof.steps.iter().map(|s| s.confidence).product::<f64>();
->>>>>>> ruvnet/main
 
         proof.valid = proof.confidence > 0.5;
 
@@ -159,12 +138,14 @@ impl FormalReasoner {
         }
 
         // Check if action parameters are valid
-        if action.parameters.is_empty() {
+        let param_confidence = if action.parameters.is_empty() {
             0.9
         } else {
             // Verify parameters make sense
             0.85
-        }
+        };
+
+        param_confidence
     }
 
     async fn verify_outcomes(&self, action: &Action) -> f64 {

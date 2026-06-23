@@ -7,7 +7,6 @@ use midstream::{
     AgentContext, Entity, EntityType, KnowledgeGraph, LeanAgenticConfig, LeanAgenticSystem,
     Relation,
 };
-use std::sync::Arc;
 use std::time::Instant;
 
 #[tokio::test]
@@ -16,7 +15,7 @@ async fn test_weather_intent_simulation() {
     let system = LeanAgenticSystem::new(config);
     let mut context = AgentContext::new("weather_session".to_string());
 
-    let messages = [
+    let messages = vec![
         "What's the weather like today?",
         "How about tomorrow?",
         "Will it rain this weekend?",
@@ -57,11 +56,7 @@ async fn test_knowledge_accumulation_simulation() {
     ];
 
     for msg in &learning_sequence {
-<<<<<<< HEAD
-        let _result = system
-=======
         let result = system
->>>>>>> ruvnet/main
             .process_stream_chunk(msg, context.clone())
             .await
             .unwrap();
@@ -124,7 +119,7 @@ async fn test_high_frequency_streaming_simulation() {
 #[tokio::test]
 async fn test_concurrent_sessions_simulation() {
     let config = LeanAgenticConfig::default();
-    let system = Arc::new(LeanAgenticSystem::new(config));
+    let system = LeanAgenticSystem::new(config);
 
     let num_sessions = 100;
     let mut handles = vec![];
@@ -132,7 +127,7 @@ async fn test_concurrent_sessions_simulation() {
     let start = Instant::now();
 
     for i in 0..num_sessions {
-        let sys = Arc::clone(&system);
+        let sys = &system;
         let handle = tokio::spawn(async move {
             let context = AgentContext::new(format!("session_{}", i));
             let messages = vec!["Hello", "What's the weather?", "Thank you"];

@@ -59,17 +59,6 @@ impl HyprSettings {
     #[allow(clippy::result_large_err)]
     pub fn new() -> Result<Self, ConfigError> {
         let config_dir = Path::new("config");
-<<<<<<< HEAD
-
-        let builder = Config::builder()
-            // Start with default settings
-            .add_source(File::from(config_dir.join("default.toml")).required(false))
-            // Add local overrides
-            .add_source(File::from(config_dir.join("local.toml")).required(false))
-            // Add environment variables with prefix MIDSTREAM_
-            .add_source(Environment::with_prefix("MIDSTREAM").separator("_"));
-=======
->>>>>>> ruvnet/main
 
         Figment::new()
             // Defaults: missing file is fine.

@@ -256,25 +256,6 @@ impl StrangeLoop {
         level: MetaLevel,
         data: &[String],
     ) -> Result<Vec<MetaKnowledge>, StrangeLoopError> {
-<<<<<<< HEAD
-        // Each distinct element becomes a piece of meta-knowledge; elements that
-        // recur are scored with higher confidence.
-        let mut counts: HashMap<&String, usize> = HashMap::new();
-        for item in data {
-            *counts.entry(item).or_insert(0) += 1;
-        }
-
-        let mut patterns: Vec<MetaKnowledge> = counts
-            .into_iter()
-            .map(|(pattern, count)| {
-                let confidence = (0.5 + 0.1 * count as f64).min(1.0);
-                MetaKnowledge::new(level, pattern.clone(), confidence)
-            })
-            .collect();
-
-        // Deterministic order, then limit the number of patterns.
-        patterns.sort_by(|a, b| a.pattern.cmp(&b.pattern));
-=======
         let mut patterns = Vec::new();
 
         // Every data item becomes a pattern, regardless of frequency.
@@ -300,7 +281,6 @@ impl StrangeLoop {
         patterns.dedup_by(|a, b| a.pattern == b.pattern);
 
         // Limit number of patterns
->>>>>>> ruvnet/main
         patterns.truncate(100);
 
         Ok(patterns)
@@ -504,11 +484,7 @@ mod tests {
     fn test_summary() {
         let mut strange_loop = StrangeLoop::default();
 
-        let data = vec![
-            "pattern1".to_string(),
-            "pattern2".to_string(),
-            "pattern1".to_string(),
-        ];
+        let data = vec!["pattern1".to_string(), "pattern2".to_string()];
         let _ = strange_loop.learn_at_level(MetaLevel::base(), &data);
 
         let summary = strange_loop.get_summary();

@@ -1,11 +1,18 @@
-//! Benchmarks for the `nanosecond-scheduler` crate.
+//! Comprehensive benchmarks for nanosecond-scheduler crate
 //!
-//! Exercises task scheduling and dequeuing on `RealtimeScheduler`.
+//! Benchmarks cover:
+//! - Schedule overhead (target: <100ns)
+//! - Task execution latency
+//! - Priority queue operations
+//! - Statistics calculation overhead
+//! - Multi-threaded scheduling
+//! - Batch operations
+//!
+//! Performance targets:
+//! - Schedule overhead: <100ns
+//! - Task execution: <1μs
+//! - Stats calculation: <10μs
 
-<<<<<<< HEAD
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use midstreamer_scheduler::{Deadline, Priority, RealtimeScheduler, SchedulerConfig};
-=======
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use midstreamer_scheduler::{
     stats::SchedulerStats, NanoScheduler, ScheduleResult, Task, TaskPriority,
@@ -76,29 +83,13 @@ fn bench_schedule_overhead(c: &mut Criterion) {
     group.bench_function("single_task", |b| {
         let mut scheduler = NanoScheduler::new(4);
         let mut task_id = 0u64;
->>>>>>> ruvnet/main
 
-fn bench_schedule(c: &mut Criterion) {
-    c.bench_function("scheduler_schedule_100", |b| {
         b.iter(|| {
-            let scheduler: RealtimeScheduler<u64> =
-                RealtimeScheduler::new(SchedulerConfig::default());
-            for i in 0..100u64 {
-                let _ = black_box(scheduler.schedule(
-                    black_box(i),
-                    Deadline::from_millis(100),
-                    Priority::High,
-                ));
-            }
-            black_box(scheduler.next_task())
+            task_id += 1;
+            let task = create_simple_task(task_id);
+            black_box(scheduler.schedule(black_box(task)))
         });
     });
-<<<<<<< HEAD
-}
-
-criterion_group!(benches, bench_schedule);
-criterion_main!(benches);
-=======
 
     // Batch scheduling
     for batch_size in [10, 50, 100, 500].iter() {
@@ -509,4 +500,3 @@ criterion_main!(
     stats_benches,
     threading_benches
 );
->>>>>>> ruvnet/main

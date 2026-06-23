@@ -140,16 +140,11 @@ impl QuicConnection {
     /// the QUIC variable-length integer range, rather than panicking. Values
     /// within range are forwarded unchanged.
     pub fn close(&self, error_code: u64, reason: &[u8]) {
-<<<<<<< HEAD
-        self.connection
-            .close(VarInt::from_u64(error_code).unwrap(), reason);
-=======
         // VarInt::from_u64 returns None for values > 2^62-1. Clamp rather
         // than panic so callers passing a raw OS error code can't crash the
         // process.
         let code = VarInt::from_u64(error_code).unwrap_or(VarInt::MAX);
         self.connection.close(code, reason);
->>>>>>> ruvnet/main
     }
 
     /// Get the remote address
@@ -260,19 +255,10 @@ impl QuicSendStream {
 fn build_client_tls_config() -> Result<quinn::rustls::ClientConfig, QuicError> {
     use rustls_platform_verifier::BuilderVerifierExt;
 
-<<<<<<< HEAD
-impl SkipServerVerification {
-    fn new() -> Arc<Self> {
-        Arc::new(Self(Arc::new(
-            quinn::rustls::crypto::ring::default_provider(),
-        )))
-    }
-=======
     quinn::rustls::ClientConfig::builder()
         .with_platform_verifier()
         .map(|builder| builder.with_no_client_auth())
         .map_err(|e| QuicError::TlsError(format!("platform verifier init failed: {e:?}")))
->>>>>>> ruvnet/main
 }
 
 #[cfg(feature = "insecure-dev-only-skip-server-verification")]

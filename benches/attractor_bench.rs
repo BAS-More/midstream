@@ -1,52 +1,53 @@
-//! Benchmarks for the `temporal-attractor-studio` crate.
+//! Comprehensive benchmarks for temporal-attractor-studio crate
 //!
-//! Exercises the public `AttractorAnalyzer` API: building a trajectory from
-//! phase-space points and running attractor analysis over it.
+//! Benchmarks cover:
+//! - Phase space embedding (target: <20ms)
+//! - Lyapunov exponent calculation (target: <500ms)
+//! - Attractor detection (target: <100ms)
+//! - Trajectory analysis
+//! - Dimension estimation
+//! - Chaos detection
+//!
+//! Performance targets:
+//! - Phase space: <20ms for n=1000
+//! - Lyapunov: <500ms
+//! - Detection: <100ms
 
-<<<<<<< HEAD
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use midstreamer_attractor::{AttractorAnalyzer, PhasePoint};
-=======
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use midstreamer_attractor::{
     detection::detect_attractor_type, dimension::estimate_correlation_dimension,
     embedding::reconstruct_phase_space, lyapunov::calculate_lyapunov_exponent, AttractorStudio,
     AttractorType, PhaseSpace, Trajectory,
 };
->>>>>>> ruvnet/main
 
-fn phase_point(i: usize) -> PhasePoint {
-    let t = i as f64 * 0.1;
-    PhasePoint::new(vec![t.sin(), t.cos(), (t * 0.5).sin()], i as u64)
-}
+// ============================================================================
+// Test Signal Generators
+// ============================================================================
 
-<<<<<<< HEAD
-fn bench_add_points(c: &mut Criterion) {
-    c.bench_function("attractor_add_points_200", |b| {
-        b.iter(|| {
-            let mut analyzer = AttractorAnalyzer::new(3, 256);
-            for i in 0..200 {
-                let _ = black_box(analyzer.add_point(phase_point(i)));
-            }
-            black_box(analyzer)
-        });
-    });
-}
+fn generate_lorenz_attractor(n: usize) -> Vec<(f64, f64, f64)> {
+    let dt = 0.01;
+    let sigma = 10.0;
+    let rho = 28.0;
+    let beta = 8.0 / 3.0;
 
-fn bench_analyze(c: &mut Criterion) {
-    let mut analyzer = AttractorAnalyzer::new(3, 256);
-    for i in 0..200 {
-        let _ = analyzer.add_point(phase_point(i));
+    let mut points = Vec::with_capacity(n);
+    let (mut x, mut y, mut z) = (1.0, 1.0, 1.0);
+
+    for _ in 0..n {
+        let dx = sigma * (y - x);
+        let dy = x * (rho - z) - y;
+        let dz = x * y - beta * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        points.push((x, y, z));
     }
 
-    c.bench_function("attractor_analyze_200", |b| {
-        b.iter(|| black_box(analyzer.analyze()));
-    });
+    points
 }
 
-criterion_group!(benches, bench_add_points, bench_analyze);
-criterion_main!(benches);
-=======
 fn generate_rossler_attractor(n: usize) -> Vec<(f64, f64, f64)> {
     let dt = 0.01;
     let a = 0.2;
@@ -497,4 +498,3 @@ criterion_main!(
     chaos_benches,
     pipeline_benches
 );
->>>>>>> ruvnet/main

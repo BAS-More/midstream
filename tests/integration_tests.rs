@@ -277,13 +277,8 @@ fn test_full_system_strange_loop() {
 
     let mut strange_loop = StrangeLoop::new(StrangeLoopConfig {
         max_meta_depth: 5,
-<<<<<<< HEAD
-        enable_self_modification: false,
-        max_modifications_per_cycle: 10,
-=======
         enable_self_modification: true,
         max_modifications_per_cycle: 100,
->>>>>>> ruvnet/main
         safety_check_enabled: true,
     });
 
@@ -326,11 +321,7 @@ fn test_full_system_strange_loop() {
     // Verify workflow properties
     for i in 0..workflow_steps.len() {
         let mut state = TemporalState::new(i as u64, i as u64 * 100);
-<<<<<<< HEAD
-        state.set_proposition("scheduled", true);
-=======
         state.set_proposition("scheduled", true); // all steps are always scheduled (i >= 0 is always true for usize)
->>>>>>> ruvnet/main
         state.set_proposition("executed", i >= 1);
         state.set_proposition("analyzed", i >= 2);
         state.set_proposition("verified", i >= 3);
@@ -534,52 +525,30 @@ fn test_performance_scalability() {
 fn test_pattern_detection_pipeline() {
     println!("\n=== Test 8: Pattern Detection Pipeline ===");
 
-    let comparator: TemporalComparator<i64> = TemporalComparator::new(100, 1000);
+    let comparator: TemporalComparator<f64> = TemporalComparator::new(100, 1000);
 
-    // Time series with a verbatim repeating pattern at indices 0 and 5.
-    let series = vec![1, 2, 3, 2, 1, 1, 2, 3, 2, 1, 5, 6];
-    let pattern = vec![1, 2, 3, 2, 1];
+    // Time series with repeating pattern
+    let series = vec![1.0, 2.0, 3.0, 2.0, 1.0, 1.0, 2.0, 3.0, 2.0, 1.0, 5.0, 6.0];
+    let pattern = vec![1.0, 2.0, 3.0, 2.0, 1.0];
 
     // Find similar patterns
-    let matches = comparator
-        .find_similar_generic(&series, &pattern, 0.5)
-        .unwrap();
+    let matches = comparator.find_similar(&series, &pattern, 1.0);
     println!("  Found {} pattern matches", matches.len());
 
-    for m in &matches {
-        println!(
-            "    Match at index {} with distance {:.4}",
-            m.start_index, m.distance
-        );
+    for (idx, dist) in &matches {
+        println!("    Match at index {} with distance {:.4}", idx, dist);
     }
 
     assert!(matches.len() >= 2, "Should find repeated pattern");
-    assert!(
-        matches.iter().any(|m| m.start_index == 0),
-        "Should match the pattern at index 0"
-    );
-    assert!(
-        matches.iter().any(|m| m.start_index == 5),
-        "Should match the pattern at index 5"
-    );
+    assert_eq!(matches[0].0, 0, "First match at index 0");
+    assert_eq!(matches[1].0, 5, "Second match at index 5");
 
-<<<<<<< HEAD
-    // A pattern made of values not present should not match closely.
-    let no_match = comparator
-        .find_similar_generic(&series, &[100, 200, 300], 0.1)
-        .unwrap();
-    assert!(
-        no_match.is_empty(),
-        "Non-existent pattern should not be detected"
-    );
-=======
     // Test pattern detection
     let detected = comparator.detect_pattern(&series, &pattern, 1.0);
     assert!(detected, "Pattern should be detected");
 
     let no_match = comparator.detect_pattern(&series, &[10.0, 20.0, 30.0], 1.0);
     assert!(!no_match, "Non-existent pattern should not be detected");
->>>>>>> ruvnet/main
 
     println!("  ✓ Pattern detection pipeline verified");
     println!("=== Test 8 PASSED ===\n");

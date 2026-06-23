@@ -6,13 +6,8 @@
 #![cfg(feature = "lean-agentic")]
 
 use midstream::{
-<<<<<<< HEAD
-    Action, ComparisonAlgorithm, Priority, RealtimeScheduler, SchedulingPolicy, Sequence,
-    TemporalComparator,
-=======
     Action, AgentContext, AgenticLoop, ComparisonAlgorithm, LeanAgenticConfig, Priority,
     RealtimeScheduler, SchedulingPolicy, Sequence, TemporalComparator,
->>>>>>> ruvnet/main
 };
 use std::collections::HashMap;
 use std::time::Duration;
@@ -89,13 +84,12 @@ async fn test_temporal_action_sequence_analysis() {
         "learn".to_string(),
     ];
 
-    // Anomalous behavior: skips verification and ends with a recovery step,
-    // so it shares most of the workflow but is not a pure subsequence.
+    // Anomalous behavior (skips verification)
     let anomalous_sequence = vec![
         "plan".to_string(),
         "execute".to_string(),
         "observe".to_string(),
-        "rollback".to_string(),
+        "learn".to_string(),
     ];
 
     // Compare sequences

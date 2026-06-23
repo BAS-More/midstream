@@ -4,29 +4,6 @@
 
 **Real-time LLM streaming with inflight analysis**
 
-<<<<<<< HEAD
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/midstreamer.svg)](https://www.npmjs.com/package/midstreamer)
-[![Rust](https://img.shields.io/badge/Rust-1.71+-orange.svg)](https://www.rust-lang.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![WASM](https://img.shields.io/badge/WASM-Ready-purple.svg)](wasm/)
-[![Crates.io](https://img.shields.io/badge/crates.io-10%20published-orange.svg)](https://crates.io/search?q=midstreamer)
-[![Security](https://img.shields.io/badge/Security-A+-brightgreen.svg)](security-report.json)
-[![Tests](https://img.shields.io/badge/Tests-139%20passing-brightgreen.svg)](npm/src/__tests__)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-Active-blue.svg)](.github/workflows/)
-[![Docs](https://img.shields.io/badge/docs-complete-success.svg)](docs/)
-
-**🎉 All 10 Crates Published on crates.io!**
-
-**Midstream Core (6 crates):**
-- [midstreamer-temporal-compare](https://crates.io/crates/midstreamer-temporal-compare) • [midstreamer-scheduler](https://crates.io/crates/midstreamer-scheduler) • [midstreamer-neural-solver](https://crates.io/crates/midstreamer-neural-solver) • [midstreamer-attractor](https://crates.io/crates/midstreamer-attractor) • [midstreamer-quic](https://crates.io/crates/midstreamer-quic) • [midstreamer-strange-loop](https://crates.io/crates/midstreamer-strange-loop)
-
-**AIMDS Security (4 crates):**
-- [aimds-core](https://crates.io/crates/aimds-core) • [aimds-detection](https://crates.io/crates/aimds-detection) • [aimds-analysis](https://crates.io/crates/aimds-analysis) • [aimds-response](https://crates.io/crates/aimds-response)
-
-**📦 npm Package:** [midstreamer](https://www.npmjs.com/package/midstreamer) - WebAssembly-powered temporal analysis for JavaScript/TypeScript
-=======
 [![crates.io — 6 libs](https://img.shields.io/badge/crates.io-6_published_libs-orange?style=for-the-badge&logo=rust&logoColor=white)](https://crates.io/users/ruvnet)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT_OR_Apache--2.0-yellow?style=for-the-badge)](#license)
 [![MSRV: 1.81](https://img.shields.io/badge/MSRV-1.81-blue?style=for-the-badge&logo=rust&logoColor=white)](docs/adr/0023-msrv-policy.md)
@@ -39,7 +16,6 @@
 [![ADRs: 41](https://img.shields.io/badge/ADRs-41_decisions-6366f1?style=for-the-badge&logo=adblock&logoColor=white)](docs/adr/README.md)
 
 </div>
->>>>>>> ruvnet/main
 
 Treat an LLM token stream as a first-class signal — pattern-match it, score it, intervene on it — *while the tokens are still arriving*. MidStream is the Rust workspace + WASM bindings + npm shims that make that practical: a nanosecond scheduler, a multi-stream QUIC transport, dynamical-systems analysis, and a self-referential meta-learning loop, all under one consistent feature flag policy and a hard supply-chain gate.
 
@@ -51,119 +27,6 @@ Treat an LLM token stream as a first-class signal — pattern-match it, score it
 
 One workspace, six published libraries, one binary. The libraries are independently useful (pattern matching, real-time scheduling, attractor analysis, QUIC multi-stream) and compose into a single inflight-analysis pipeline. The binary wires them together with the OpenAI Realtime API and a console dashboard.
 
-<<<<<<< HEAD
-## 💡 What is MidStream?
-
-MidStream is a powerful platform that makes AI conversations smarter and more responsive. Instead of waiting for an AI to finish speaking before understanding what it's saying, MidStream analyzes responses **as they stream in real-time**—enabling instant insights, pattern detection, and intelligent decision-making.
-
-### The Problem It Solves
-
-Traditional AI systems process responses only after completion, missing opportunities to:
-- **Detect patterns early** in conversations
-- **React instantly** to user needs
-- **Analyze behavior** as it unfolds
-- **Understand context** in real-time
-- **Make predictions** before conversations end
-
-### How MidStream Helps
-
-MidStream combines cutting-edge technologies to deliver:
-
-**🎯 Real-Time Intelligence**: Analyze AI responses as they're generated, not after. Detect intents, patterns, and behaviors instantly—enabling proactive responses and smarter interactions.
-
-**🤖 Autonomous Learning**: Built-in agents that learn from every conversation, automatically adapting and improving over time without manual intervention. The system gets smarter with each interaction.
-
-**📊 Deep Pattern Analysis**: Advanced temporal analysis reveals hidden patterns in conversations, predicting user needs and detecting system behaviors that traditional analytics miss.
-
-**🎥 Multi-Modal Understanding**: Process text, audio, and video streams simultaneously. Perfect for voice assistants, video calls, live streaming platforms, and real-time customer support.
-
-**🔐 Production-Ready**: Enterprise-grade security, comprehensive testing, and performance optimization ensure reliability for mission-critical applications.
-
-### Who It's For
-
-- **Developers** building real-time AI applications
-- **Businesses** needing intelligent customer support
-- **Researchers** studying conversation dynamics
-- **Product Teams** creating voice/video AI experiences
-- **Anyone** who wants smarter, faster AI interactions
-
-Built with Rust for performance and TypeScript for flexibility, MidStream combines the best of both worlds—blazing speed with developer-friendly tools.
-
----
-
-## 🚀 Features
-
-### 🎯 Core Capabilities
-- **🔄 Real-Time LLM Streaming** - Low-latency streaming with OpenAI Realtime API & custom providers
-- **🤖 Lean Agentic Learning** - Autonomous agents with formal reasoning and meta-learning
-- **📊 Temporal Analysis** - Pattern detection, attractor analysis, and Lyapunov exponents
-- **🎥 Multi-Modal Streaming** - Text, audio, and video stream introspection (RTMP/WebRTC/HLS)
-- **📈 Real-Time Dashboard** - Minimal console UI with live metrics and visualizations
-- **🧠 Meta-Learning** - Adaptive learning from conversation patterns and behaviors
-- **🔐 Production Ready** - Comprehensive security, error handling, and performance optimization
-
-### 🎛️ Dashboard & Monitoring
-- Real-time metrics (FPS, latency, uptime, tokens)
-- Temporal analysis visualization (attractors, stability, chaos detection)
-- Pattern detection and classification
-- Multi-stream monitoring (text/audio/video)
-- Configurable refresh rates (100-1000ms)
-- Event-driven updates with memory management
-
-### 🎥 Streaming Integration
-- **QUIC/HTTP/3** - Multiplexed transport with 0-RTT and stream prioritization
-- **RTMP/RTMPS** - Real-Time Messaging Protocol support
-- **WebRTC** - Peer-to-peer audio/video streaming
-- **HLS** - HTTP Live Streaming support
-- **WebSocket/SSE** - Bidirectional and server-sent events
-- Audio transcription framework (Whisper-ready)
-- Video object detection framework (TensorFlow-ready)
-
-### 🦀 Rust Workspace Crates
-- **midstreamer-temporal-compare** - Pattern matching with DTW, LCS, edit distance
-- **midstreamer-scheduler** - Ultra-low-latency real-time task scheduling
-- **midstreamer-attractor** - Dynamical systems & Lyapunov analysis
-- **midstreamer-neural-solver** - LTL verification with neural reasoning
-- **midstreamer-quic** - QUIC/HTTP3 multi-stream support
-- **midstreamer-strange-loop** - Meta-learning & self-referential systems
-
-### 🛡️ AIMDS Security Crates
-- **aimds-core** - Core threat detection types and utilities
-- **aimds-detection** - Pattern matching, PII detection, threat scheduling
-- **aimds-analysis** - Behavioral analysis and attack surface mapping
-- **aimds-response** - Adaptive response with meta-learning
-
-### 🔬 Advanced Analysis
-- **Pattern Detection** - Dynamic Time Warping (DTW), LCS, edit distance
-- **Attractor Analysis** - Fixed point, periodic, chaotic behavior detection
-- **Lyapunov Exponents** - System stability measurement
-- **Meta-Learning** - Policy adaptation and reward optimization
-- **Knowledge Graphs** - Dynamic, evolving knowledge structures
-- **Temporal Logic** - Sequence analysis and prediction
-
-### 🛡️ Security & Quality
-- 10/10 security checks passed
-- No hardcoded credentials
-- HTTPS/WSS enforcement
-- Input validation & sanitization
-- Rate limiting & error handling
-- Comprehensive test coverage (100% new code)
-
----
-
-## 📦 Quick Start
-
-### Prerequisites
-```bash
-# Required
-- Rust 1.71+ (for core engine)
-- Node.js 18+ (for CLI/Dashboard)
-- npm or yarn
-
-# Optional
-- Docker (for containerized deployment)
-- OpenAI API key (for Realtime API)
-=======
 ```
 Provider stream  ──▶  zero-copy Bytes  ──▶  inflight pipeline  ──▶  decisions
    (OpenAI RT,         (ADR-0006)             │
@@ -178,7 +41,6 @@ Provider stream  ──▶  zero-copy Bytes  ──▶  inflight pipeline  ─�
                                                        │
                                                        ▼
                                               Dashboard · MCP · WASM · npm
->>>>>>> ruvnet/main
 ```
 
 > **New to MidStream?** Start with one crate. `temporal-compare` and `scheduler` ship clean tests, run on WASM, and have zero unsafe code — they're the easiest entry points. Move up to `strange-loop` once you want the full meta-learning loop.
@@ -211,41 +73,6 @@ cargo add midstreamer-temporal-compare midstreamer-scheduler \
 ```
 
 ### Path B — Full workspace
-
-#### Option 1: npm Package (Recommended for JavaScript/TypeScript)
-
-```bash
-# Install the WebAssembly package
-npm install midstreamer
-
-# Use in your project
-import { dtw_distance } from 'midstreamer';
-
-# Or use the CLI
-npx midstreamer version
-npx midstreamer benchmark
-npx midstreamer compare "1,2,3,4" "1,2,4,3"
-```
-
-#### Option 2: Rust Crates (For Rust Projects)
-
-```bash
-# Add to your Cargo.toml
-cargo add midstreamer-temporal-compare
-cargo add midstreamer-scheduler
-cargo add midstreamer-neural-solver
-cargo add midstreamer-attractor
-cargo add midstreamer-quic
-cargo add midstreamer-strange-loop
-
-# For AIMDS security features
-cargo add aimds-core
-cargo add aimds-detection
-cargo add aimds-analysis
-cargo add aimds-response
-```
-
-#### Option 3: From Source
 
 ```bash
 git clone https://github.com/ruvnet/midstream.git

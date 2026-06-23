@@ -1,15 +1,19 @@
-//! Benchmarks for the `strange-loop` meta-learning crate.
+//! Comprehensive benchmarks for strange-loop crate
 //!
-//! Exercises `StrangeLoop::learn_at_level`, which extracts recurring patterns
-//! and propagates meta-knowledge up the hierarchy.
+//! Benchmarks cover:
+//! - Pattern extraction performance
+//! - Recursive optimization depth
+//! - Meta-learning iteration speed
+//! - Self-modification safety checks
+//! - Rollback mechanism performance
+//! - Validation overhead
+//!
+//! Performance targets:
+//! - Pattern extraction: <10ms for 1000 patterns
+//! - Recursive depth: >10 levels without stack overflow
+//! - Iteration speed: >1000 iterations/second
+//! - Safety overhead: <5% performance impact
 
-<<<<<<< HEAD
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use midstreamer_strange_loop::{MetaLevel, StrangeLoop};
-
-fn bench_learn_at_level(c: &mut Criterion) {
-    let data: Vec<String> = (0..50).map(|i| format!("pattern{}", i % 8)).collect();
-=======
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use midstreamer_strange_loop::{
     MetaKnowledge, MetaLevel, ModificationRule, SafetyConstraint, StrangeLoop, StrangeLoopConfig,
@@ -435,20 +439,30 @@ fn bench_rollback_reset(c: &mut Criterion) {
     // Reset after learning
     group.bench_function("reset_after_learning", |b| {
         let data = generate_pattern_data(100, "medium");
->>>>>>> ruvnet/main
 
-    c.bench_function("strange_loop_learn_at_level", |b| {
         b.iter(|| {
             let mut strange_loop = StrangeLoop::default();
-            black_box(strange_loop.learn_at_level(MetaLevel::base(), black_box(&data)))
+            strange_loop.learn_at_level(MetaLevel::base(), &data).ok();
+            black_box(strange_loop.reset())
         });
     });
+
+    // Reset after deep recursion
+    group.bench_function("reset_deep_recursion", |b| {
+        let data = generate_pattern_data(50, "simple");
+
+        b.iter(|| {
+            let mut config = StrangeLoopConfig::default();
+            config.max_meta_depth = 10;
+            let mut strange_loop = StrangeLoop::new(config);
+            strange_loop.learn_at_level(MetaLevel::base(), &data).ok();
+            black_box(strange_loop.reset())
+        });
+    });
+
+    group.finish();
 }
 
-<<<<<<< HEAD
-criterion_group!(benches, bench_learn_at_level);
-criterion_main!(benches);
-=======
 fn bench_rollback_state_recovery(c: &mut Criterion) {
     let mut group = c.benchmark_group("state_recovery");
 
@@ -691,4 +705,3 @@ criterion_main!(
     pipeline_benches,
     memory_benches
 );
->>>>>>> ruvnet/main

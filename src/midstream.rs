@@ -1,13 +1,8 @@
 use async_trait::async_trait;
-<<<<<<< HEAD
-use futures::stream::BoxStream;
-use serde::{Deserialize, Serialize};
-=======
 use bytes::Bytes;
 use futures::stream::BoxStream;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
->>>>>>> ruvnet/main
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Mutex;
@@ -148,11 +143,7 @@ impl Midstream {
 
     async fn process_message(
         &self,
-<<<<<<< HEAD
-        content: String,
-=======
         content: Bytes,
->>>>>>> ruvnet/main
     ) -> Result<LLMMessage, Box<dyn std::error::Error>> {
         // Validate content
         if content.is_empty() {
@@ -178,13 +169,10 @@ impl Midstream {
             }
         }
 
-<<<<<<< HEAD
-=======
         // Capture metric fields that need the byte handle before we move it.
         let content_len = content.len();
         drop(content_str);
 
->>>>>>> ruvnet/main
         let message = LLMMessage {
             content,
             timestamp,
@@ -202,14 +190,7 @@ impl Midstream {
                 ("type".to_string(), "message".to_string()),
                 ("size".to_string(), content_len.to_string()),
                 ("intent".to_string(), format!("{:?}", message.intent)),
-<<<<<<< HEAD
-                (
-                    "urgent".to_string(),
-                    self.is_urgent(&message.content).to_string(),
-                ),
-=======
                 ("urgent".to_string(), urgent.to_string()),
->>>>>>> ruvnet/main
             ],
         };
 

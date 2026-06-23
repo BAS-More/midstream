@@ -22,10 +22,7 @@ native = ["dep:tokio"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "2.0"
-<<<<<<< HEAD
-=======
 tokio = { version = "1.42.0", features = ["full"], optional = true }
->>>>>>> ruvnet/main
 crossbeam = "0.8"
 parking_lot = "0.12"
 

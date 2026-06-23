@@ -9,19 +9,13 @@
 //!
 //! Run with: cargo run --example lean_agentic_streaming
 
-<<<<<<< HEAD
-=======
 use bytes::Bytes;
->>>>>>> ruvnet/main
 use futures::stream::{iter, BoxStream};
 use midstream::{
     AgentContext, HyprServiceImpl, HyprSettings, LLMClient, LeanAgenticConfig, LeanAgenticSystem,
     Midstream, StreamProcessor,
 };
-<<<<<<< HEAD
-=======
 use tokio;
->>>>>>> ruvnet/main
 
 /// Example LLM client that simulates streaming responses
 struct SimulatedLLMClient {
@@ -92,11 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Process with lean agentic system
         let result = lean_system
-<<<<<<< HEAD
-            .process_stream_chunk(&msg.content, context.clone())
-=======
             .process_stream_chunk(&chunk, context.clone())
->>>>>>> ruvnet/main
             .await?;
 
         println!("    → Action: {}", result.action.description);

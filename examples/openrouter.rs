@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 use bytes::Bytes;
->>>>>>> ruvnet/main
 use dotenvy::dotenv;
 use eventsource_stream::Eventsource;
 use futures::stream::{BoxStream, StreamExt};

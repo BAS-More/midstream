@@ -1,22 +1,18 @@
-//! Benchmarks for the `temporal-neural-solver` crate.
+//! Comprehensive benchmarks for temporal-neural-solver crate
 //!
-//! Exercises the public `TemporalNeuralSolver` API: building a trace of states
-//! and verifying temporal-logic formulas against it.
+//! Benchmarks cover:
+//! - LTL formula encoding (target: <10ms)
+//! - Verification performance (target: <100ms)
+//! - Formula parsing
+//! - State checking
+//! - Neural network inference
+//! - Temporal logic operations
+//!
+//! Performance targets:
+//! - Formula encoding: <10ms
+//! - Verification: <100ms
+//! - Parsing: <5ms
 
-<<<<<<< HEAD
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use midstreamer_neural_solver::{
-    TemporalFormula, TemporalNeuralSolver, TemporalState, VerificationStrictness,
-};
-
-fn build_solver(n: usize) -> TemporalNeuralSolver {
-    let mut solver = TemporalNeuralSolver::new(n + 1, 1000, VerificationStrictness::Medium);
-    for i in 0..n {
-        let mut state = TemporalState::new(i as u64, i as u64);
-        state.set_proposition("p", i % 2 == 0);
-        state.set_proposition("q", i % 3 == 0);
-        solver.add_state(state);
-=======
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use midstreamer_neural_solver::{
     encoder::encode_formula, neural::NeuralVerifier, parser::parse_ltl, verifier::verify_trace,
@@ -58,27 +54,9 @@ fn create_nested_formula(depth: usize) -> LTLFormula {
         LTLFormula::Globally(Box::new(LTLFormula::Finally(Box::new(
             create_nested_formula(depth - 1),
         ))))
->>>>>>> ruvnet/main
     }
-    solver
 }
 
-<<<<<<< HEAD
-fn bench_verify(c: &mut Criterion) {
-    let solver = build_solver(200);
-    let formula = TemporalFormula::and(
-        TemporalFormula::atom("p"),
-        TemporalFormula::not(TemporalFormula::atom("q")),
-    );
-
-    c.bench_function("solver_verify_200", |b| {
-        b.iter(|| black_box(solver.verify(black_box(&formula))));
-    });
-}
-
-criterion_group!(benches, bench_verify);
-criterion_main!(benches);
-=======
 fn create_safety_property() -> LTLFormula {
     // G (request -> F grant)
     LTLFormula::Globally(Box::new(LTLFormula::Implies(
@@ -510,4 +488,3 @@ criterion_main!(
     operator_benches,
     pipeline_benches
 );
->>>>>>> ruvnet/main

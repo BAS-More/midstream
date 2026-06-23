@@ -1,11 +1,7 @@
-//! Benchmarks for the Lean Agentic Learning System.
+//! Comprehensive benchmarks for Lean Agentic Learning System
 //!
-//! Exercises the end-to-end `process_stream_chunk` path of `LeanAgenticSystem`.
+//! Run with: cargo bench
 
-<<<<<<< HEAD
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use midstream::{AgentContext, LeanAgenticConfig, LeanAgenticSystem};
-=======
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use midstream::{
     Action, AgentContext, AgenticLoop, AttractorAnalyzer, BehaviorAttractorAnalyzer,
@@ -15,35 +11,50 @@ use midstream::{
     TemporalState, TemporalTrace, Trajectory,
 };
 use std::collections::HashMap;
->>>>>>> ruvnet/main
 use tokio::runtime::Runtime;
 
-fn bench_process_stream_chunk(c: &mut Criterion) {
-    let runtime = Runtime::new().unwrap();
-    let system = LeanAgenticSystem::new(LeanAgenticConfig::default());
+fn benchmark_formal_reasoning(c: &mut Criterion) {
+    let mut group = c.benchmark_group("formal_reasoning");
 
-    c.bench_function("process_stream_chunk", |b| {
+    let rt = Runtime::new().unwrap();
+
+    // Benchmark action verification
+    group.bench_function("verify_action", |b| {
         b.iter(|| {
-            runtime.block_on(async {
-                let context = AgentContext::new("bench_session".to_string());
+            rt.block_on(async {
+                let reasoner = FormalReasoner::new();
+                let action = Action {
+                    action_type: "test".to_string(),
+                    description: "Test action".to_string(),
+                    parameters: HashMap::new(),
+                    tool_calls: vec![],
+                    expected_outcome: Some("success".to_string()),
+                    expected_reward: 0.8,
+                };
+                let context = AgentContext::new("test_session".to_string());
+
+                black_box(reasoner.verify_action(&action, &context).await.unwrap())
+            })
+        });
+    });
+
+    // Benchmark theorem proving
+    group.bench_function("prove_theorem", |b| {
+        b.iter(|| {
+            rt.block_on(async {
+                let mut reasoner = FormalReasoner::new();
                 black_box(
-<<<<<<< HEAD
-                    system
-                        .process_stream_chunk(black_box("What is the weather today?"), context)
-=======
                     reasoner
                         .prove_theorem("Q".to_string(), vec!["P".to_string(), "P -> Q".to_string()])
->>>>>>> ruvnet/main
                         .await,
                 )
             })
         });
     });
+
+    group.finish();
 }
 
-<<<<<<< HEAD
-criterion_group!(benches, bench_process_stream_chunk);
-=======
 fn benchmark_agentic_loop(c: &mut Criterion) {
     let mut group = c.benchmark_group("agentic_loop");
 
@@ -748,5 +759,4 @@ criterion_group!(
     benchmark_meta_learning,
 );
 
->>>>>>> ruvnet/main
 criterion_main!(benches);

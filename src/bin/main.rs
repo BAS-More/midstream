@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 use bytes::Bytes;
->>>>>>> ruvnet/main
 use futures::stream::iter;
 use futures::stream::BoxStream;
 use midstream::{HyprServiceImpl, HyprSettings, LLMClient, Midstream, StreamProcessor};

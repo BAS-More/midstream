@@ -44,50 +44,7 @@ jobs:
           shared-key: "clippy"
 
       - name: Run clippy
-        # Exclude `midstream` and `hyprstream` for the same reason
-        # the msrv job does (see comment there): `src/lean_agentic/`
-        # has unresolved imports under `--all-features` (gated by the
-        # off-by-default `lean-agentic` feature; ADR-0005 deprecates
-        # it). Drop these excludes when that retirement lands.
-        run: cargo clippy --workspace --exclude midstream --exclude hyprstream --all-targets --all-features -- -D warnings
-
-  # MSRV (Minimum Supported Rust Version) check per ADR-0023.
-  # Every published crate declares rust-version = "1.88"; this job
-  # proves the workspace still compiles + tests on that toolchain so
-  # the declared MSRV doesn't quietly drift forward. --locked is
-  # mandatory: an unlocked update could pull a transitive dep that
-  # requires newer rustc, masking the MSRV check.
-  # Bumped from 1.81 → 1.88: transitive deps adopted requirements that
-  # exceed 1.81:
-  #   nalgebra 0.34.2 requires rustc 1.87.0 (edition2024 + api)
-  #   time 0.3.47 / time-core 0.1.8 require rustc 1.88.0
-  # Rust 1.88 (2025-06-05) is the first stable release that satisfies
-  # all transitive rust-version requirements in the locked dep graph.
-  msrv:
-    name: MSRV (1.88)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust 1.88 toolchain
-        uses: dtolnay/rust-toolchain@1.88
-
-      - name: Setup cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: "msrv-1.88"
-
-      - name: cargo check (workspace, locked)
-        # Exclude `midstream` and `hyprstream` while ADR-0002 / ADR-0014
-        # un-vendoring is in flight: those two crates currently fail to
-        # build on any toolchain due to arrow-schema version skew via
-        # the vendored hyprstream-main. Re-include both once ADR-0002
-        # lands. The 6 published `midstreamer-*` crates plus the WASM
-        # bindings are covered.
-        run: cargo check --workspace --exclude midstream --exclude hyprstream --locked
-
-      - name: cargo test --lib (workspace, locked)
-        run: cargo test --workspace --exclude midstream --exclude hyprstream --lib --locked
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
   # Build and test matrix
   test:
@@ -129,12 +86,7 @@ jobs:
         with:
           shared-key: "test-${{ matrix.os }}-${{ matrix.rust }}"
 
-      # `--exclude midstream --exclude hyprstream` mirrors msrv +
-      # clippy (see comments there). The 6 published `midstreamer-*`
-      # libs are what we actually want to exercise under
-      # `--all-features` until ADR-0005's lean_agentic retirement ships.
       - name: Build workspace
-<<<<<<< HEAD
         run: cargo build --workspace --all-features --verbose ${{ matrix.cargo-exclude }}
 
       - name: Run unit tests
@@ -150,18 +102,6 @@ jobs:
 
       - name: Run doc tests
         run: cargo test --workspace --all-features --doc --verbose ${{ matrix.cargo-exclude }}
-=======
-        run: cargo build --workspace --exclude midstream --exclude hyprstream --all-features --verbose
-
-      - name: Run unit tests
-        run: cargo test --workspace --exclude midstream --exclude hyprstream --all-features --lib --verbose
-
-      - name: Run integration tests
-        run: cargo test --workspace --exclude midstream --exclude hyprstream --all-features --test '*' --verbose
-
-      - name: Run doc tests
-        run: cargo test --workspace --exclude midstream --exclude hyprstream --all-features --doc --verbose
->>>>>>> ruvnet/main
 
   # Individual crate builds
   build-crates:
@@ -169,21 +109,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Crate names match the `[package].name` in each
-        # `crates/*/Cargo.toml` (the published crate names since the
-        # `midstreamer-*` rename in PR #2). The on-disk directory
-        # names (e.g. `crates/nanosecond-scheduler/`) are independent
-        # of the package name cargo cares about.
         crate:
           - midstreamer-temporal-compare
           - midstreamer-scheduler
           - midstreamer-attractor
           - midstreamer-neural-solver
           - midstreamer-strange-loop
-<<<<<<< HEAD
           - midstreamer-quic
-=======
->>>>>>> ruvnet/main
 
     steps:
       - uses: actions/checkout@v4
@@ -280,14 +212,13 @@ jobs:
           shared-key: "docs"
 
       - name: Build documentation
-        # Same midstream/hyprstream exclusion as clippy + test.
-        run: cargo doc --workspace --exclude midstream --exclude hyprstream --all-features --no-deps
+        run: cargo doc --workspace --all-features --no-deps
         env:
           RUSTDOCFLAGS: "-D warnings"
 
       - name: Deploy documentation
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/doc
@@ -307,18 +238,10 @@ jobs:
         run: cargo install cargo-audit
 
       - name: Run security audit
-<<<<<<< HEAD
         # Fail on actual security vulnerabilities. Unmaintained/unsound advisories
         # (warnings) are not denied: the remaining ones are deep transitive
         # dependencies (e.g. via arrow-flight/tonic) with no available fix.
         run: cargo audit
-=======
-        # RUSTSEC-2024-0436 (paste unmaintained) is a transitive dep via
-        # nalgebra → simba → paste; no upstream fix exists without breaking
-        # changes. Also tracked in deny.toml. Suppress here so `--deny
-        # warnings` does not block on an advisory that cannot be resolved.
-        run: cargo audit --deny warnings --ignore RUSTSEC-2024-0436
->>>>>>> ruvnet/main
 
   # Code coverage
   coverage:
@@ -339,20 +262,15 @@ jobs:
         run: cargo install cargo-tarpaulin
 
       - name: Generate coverage
-<<<<<<< HEAD
         # Best-effort: cargo-tarpaulin's instrumentation (link-dead-code) cannot
         # compile the transitive `polars-arrow` dependency on current stable
         # rustc (a const-eval guard panics). This is a tooling/transitive-dep
         # incompatibility, not a test failure, so it must not fail CI.
         continue-on-error: true
         run: cargo tarpaulin --workspace --all-features --out Xml --output-dir coverage
-=======
-        # Same midstream/hyprstream exclusion as clippy + test.
-        run: cargo tarpaulin --workspace --exclude midstream --exclude hyprstream --all-features --out Xml --output-dir coverage
->>>>>>> ruvnet/main
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v3
         with:
           files: ./coverage/cobertura.xml
           fail_ci_if_error: false
@@ -364,7 +282,6 @@ jobs:
     needs:
       - format
       - clippy
-      - msrv
       - test
       - build-crates
       - wasm

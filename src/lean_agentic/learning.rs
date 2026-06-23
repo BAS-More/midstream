@@ -70,11 +70,7 @@ impl StreamLearner {
                     .await?;
             }
             AdaptationStrategy::Batched { batch_size } => {
-<<<<<<< HEAD
-                if self.iterations.is_multiple_of(*batch_size) {
-=======
                 if self.iterations % batch_size == 0 {
->>>>>>> ruvnet/main
                     self.model
                         .update_batch(&self.experience_buffer, self.learning_rate)
                         .await?;
@@ -155,12 +151,6 @@ pub struct OnlineModel {
     feature_stats: HashMap<String, FeatureStats>,
 }
 
-impl Default for OnlineModel {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl OnlineModel {
     pub fn new() -> Self {
         Self {
@@ -231,14 +221,10 @@ impl OnlineModel {
             *weight += learning_rate * error * value;
 
             // Update feature statistics
-<<<<<<< HEAD
-            let stats = self.feature_stats.entry(feature).or_default();
-=======
             let stats = self
                 .feature_stats
                 .entry(feature)
                 .or_insert(FeatureStats::default());
->>>>>>> ruvnet/main
             stats.update(value);
         }
 
@@ -273,10 +259,9 @@ pub struct Experience {
 }
 
 /// Adaptation strategy for online learning
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AdaptationStrategy {
     /// Update immediately after each experience
-    #[default]
     Immediate,
 
     /// Update in batches
@@ -284,6 +269,12 @@ pub enum AdaptationStrategy {
 
     /// Use experience replay
     ExperienceReplay { replay_size: usize },
+}
+
+impl Default for AdaptationStrategy {
+    fn default() -> Self {
+        AdaptationStrategy::Immediate
+    }
 }
 
 /// Feature statistics for normalization
@@ -301,7 +292,6 @@ impl FeatureStats {
         self.sum_squared += value * value;
     }
 
-    #[allow(dead_code)]
     fn mean(&self) -> f64 {
         if self.count == 0 {
             0.0
@@ -310,7 +300,6 @@ impl FeatureStats {
         }
     }
 
-    #[allow(dead_code)]
     fn variance(&self) -> f64 {
         if self.count == 0 {
             0.0

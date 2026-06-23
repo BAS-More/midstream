@@ -265,21 +265,9 @@ where
         let capacity =
             NonZeroUsize::new(cache_size.max(1)).expect("cache_size.max(1) is always at least 1");
         Self {
-<<<<<<< HEAD
-            cache: Arc::new(Mutex::new(LruCache::new(
-                NonZeroUsize::new(cache_size).unwrap(),
-            ))),
-            pattern_cache: Arc::new(Mutex::new(LruCache::new(
-                NonZeroUsize::new(cache_size).unwrap(),
-            ))),
-            similarity_cache: Arc::new(Mutex::new(LruCache::new(
-                NonZeroUsize::new(cache_size).unwrap(),
-            ))),
-=======
             cache: Arc::new(Mutex::new(LruCache::new(capacity))),
             pattern_cache: Arc::new(Mutex::new(LruCache::new(capacity))),
             similarity_cache: Arc::new(Mutex::new(LruCache::new(capacity))),
->>>>>>> ruvnet/main
             cache_hits: Arc::new(DashMap::new()),
             cache_misses: Arc::new(DashMap::new()),
             max_sequence_length,
@@ -327,75 +315,14 @@ where
         Ok(result)
     }
 
-<<<<<<< HEAD
-    /// Dynamic Time Warping implementation
-=======
     /// Dynamic Time Warping implementation (delegates to the free function
     /// `dtw_sequences` so it is also available in the weaker-bound impl block).
->>>>>>> ruvnet/main
     fn dtw(
         &self,
         seq1: &Sequence<T>,
         seq2: &Sequence<T>,
     ) -> Result<ComparisonResult, TemporalError> {
-<<<<<<< HEAD
-        let n = seq1.len();
-        let m = seq2.len();
-
-        if n == 0 || m == 0 {
-            return Ok(ComparisonResult {
-                distance: (n + m) as f64,
-                algorithm: ComparisonAlgorithm::DTW,
-                alignment: None,
-            });
-        }
-
-        // Initialize DTW matrix
-        let mut dtw = vec![vec![f64::INFINITY; m + 1]; n + 1];
-        dtw[0][0] = 0.0;
-
-        // Fill DTW matrix
-        for i in 1..=n {
-            for j in 1..=m {
-                let cost = if seq1.elements[i - 1].value == seq2.elements[j - 1].value {
-                    0.0
-                } else {
-                    1.0
-                };
-
-                dtw[i][j] = cost + dtw[i - 1][j - 1].min(dtw[i - 1][j]).min(dtw[i][j - 1]);
-            }
-        }
-
-        // Backtrack for alignment
-        let mut alignment = Vec::new();
-        let (mut i, mut j) = (n, m);
-
-        while i > 0 && j > 0 {
-            alignment.push((i - 1, j - 1));
-
-            let min_val = dtw[i - 1][j - 1].min(dtw[i - 1][j]).min(dtw[i][j - 1]);
-
-            if dtw[i - 1][j - 1] == min_val {
-                i -= 1;
-                j -= 1;
-            } else if dtw[i - 1][j] == min_val {
-                i -= 1;
-            } else {
-                j -= 1;
-            }
-        }
-
-        alignment.reverse();
-
-        Ok(ComparisonResult {
-            distance: dtw[n][m],
-            algorithm: ComparisonAlgorithm::DTW,
-            alignment: Some(alignment),
-        })
-=======
         dtw_sequences(seq1, seq2)
->>>>>>> ruvnet/main
     }
 
     /// Longest Common Subsequence implementation
@@ -440,13 +367,6 @@ where
 
         let mut dp = vec![vec![0; m + 1]; n + 1];
 
-<<<<<<< HEAD
-        for (i, row) in dp.iter_mut().enumerate().take(n + 1) {
-            row[0] = i;
-        }
-        for (j, cell) in dp[0].iter_mut().enumerate().take(m + 1) {
-            *cell = j;
-=======
         // DP base cases: indexed-loop form is the textbook shape;
         // the iter_mut().enumerate() rewrite suggested by clippy is
         // less readable for two-dimensional matrices.
@@ -457,7 +377,6 @@ where
         #[allow(clippy::needless_range_loop)]
         for j in 0..=m {
             dp[0][j] = j;
->>>>>>> ruvnet/main
         }
 
         for i in 1..=n {
@@ -511,26 +430,10 @@ where
         seq2: &Sequence<T>,
         algorithm: ComparisonAlgorithm,
     ) -> String {
-<<<<<<< HEAD
-        use std::collections::hash_map::DefaultHasher;
-        use std::hash::Hasher;
-
-        // Key on the sequence *contents* (not just lengths) so that distinct
-        // sequences of equal length do not collide in the cache.
-        let hash_sequence = |seq: &Sequence<T>| {
-            let mut hasher = DefaultHasher::new();
-            for element in &seq.elements {
-                element.value.hash(&mut hasher);
-            }
-            hasher.finish()
-        };
-
-=======
->>>>>>> ruvnet/main
         format!(
-            "{:x}:{:x}:{:?}",
-            hash_sequence(seq1),
-            hash_sequence(seq2),
+            "{:?}:{:?}:{:?}",
+            seq1.elements.len(),
+            seq2.elements.len(),
             algorithm
         )
     }
