@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "lean-agentic-wasm": "file:../pkg",
-    "agentic-flow": "^1.8.10",
+    "agentic-flow": "^2.0.14",
     "@midstream/lean-agentic": "file:../../lean-agentic-js"
   },
   "devDependencies": {
