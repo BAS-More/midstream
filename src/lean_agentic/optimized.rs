@@ -8,7 +8,8 @@
 //! - Batch processing
 
 use super::agent::Action;
-use super::knowledge::EntityType;
+use super::types::*;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -92,7 +93,6 @@ pub fn fast_hash(action: &Action) -> u64 {
 
 /// Optimized entity extraction with pre-allocated buffers
 pub struct FastEntityExtractor {
-    #[allow(dead_code)]
     buffer: String,
     patterns: Vec<EntityPattern>,
 }
@@ -101,12 +101,6 @@ pub struct FastEntityExtractor {
 struct EntityPattern {
     prefix: &'static str,
     entity_type: EntityType,
-}
-
-impl Default for FastEntityExtractor {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl FastEntityExtractor {
@@ -187,10 +181,6 @@ impl PredictionCache {
     pub fn len(&self) -> usize {
         self.predictions.len()
     }
-
-    pub fn is_empty(&self) -> bool {
-        self.predictions.is_empty()
-    }
 }
 
 /// Batch processor for amortizing costs
@@ -226,10 +216,6 @@ impl<T> BatchProcessor<T> {
 
     pub fn len(&self) -> usize {
         self.batch.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.batch.is_empty()
     }
 }
 

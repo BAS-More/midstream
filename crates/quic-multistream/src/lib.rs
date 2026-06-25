@@ -57,6 +57,12 @@ use thiserror::Error;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
+
+#[cfg(all(
+    not(target_arch = "wasm32"),
+    feature = "insecure-dev-only-skip-server-verification"
+))]
+mod insecure;
 #[cfg(not(target_arch = "wasm32"))]
 pub use native::*;
 
@@ -64,6 +70,15 @@ pub use native::*;
 mod wasm;
 #[cfg(target_arch = "wasm32")]
 pub use wasm::*;
+
+/// Embedding trait — lets downstream crates write generic code
+/// against `QuicConnection` instead of binding the concrete type.
+/// See module docs for the full story (notably ruflo-federation-peer
+/// composes this with the AIMDS `SafetyGate` trait — ADR-120 Step 3).
+#[cfg(not(target_arch = "wasm32"))]
+mod transport;
+#[cfg(not(target_arch = "wasm32"))]
+pub use transport::QuicTransport;
 
 /// Errors that can occur during QUIC operations
 #[derive(Debug, Error)]

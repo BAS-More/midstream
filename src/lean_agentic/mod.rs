@@ -48,7 +48,7 @@ pub use attractor::{
     AttractorAnalyzer, AttractorInfo, AttractorType, BehaviorAttractorAnalyzer, BehaviorSummary,
     PhasePoint, Trajectory,
 };
-pub use knowledge::{Entity, EntityType, KnowledgeGraph, Relation};
+pub use knowledge::{Entity, KnowledgeGraph, Relation, TheoremStore};
 pub use learning::{AdaptationStrategy, OnlineModel, StreamLearner};
 pub use midstreamer_strange_loop::{
     MetaKnowledge, MetaLearner, MetaLearningSummary, MetaLevel, ModificationRule, SafetyConstraint,
@@ -68,6 +68,7 @@ pub use temporal_neural::{
 };
 pub use types::{AgentState, Context, Reward};
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -240,15 +241,6 @@ pub enum LeanAgenticError {
 
     #[error("Knowledge graph error: {0}")]
     KnowledgeGraphError(String),
-
-    #[error("{0}")]
-    Other(String),
-}
-
-impl From<String> for LeanAgenticError {
-    fn from(message: String) -> Self {
-        LeanAgenticError::Other(message)
-    }
 }
 
 #[cfg(test)]
@@ -260,8 +252,7 @@ mod tests {
         let config = LeanAgenticConfig::default();
         let system = LeanAgenticSystem::new(config);
 
-        let mut context = Context::default();
-        context.add_message("Hi there".to_string());
+        let context = Context::default();
         let chunk = "Hello, world!";
 
         let result = system.process_stream_chunk(chunk, context).await;
