@@ -19,5 +19,8 @@
     "agentdb": "^1.6.1",
     "midstreamer": "^0.2.2",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "protobufjs": "^7.6.4"
   }
 }
