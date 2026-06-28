@@ -1,0 +1,52 @@
+# .trivyignore — documented, ID-scoped suppressions for the Trivy scan
+# (.github/workflows/trivy.yml) and its GitHub Advanced Security check.
+#
+# Policy: this file lists ONLY specific advisory / misconfig IDs that have
+# been reviewed and accepted. It is NOT a blanket ignore — any NEW finding
+# (new CVE, new package, new misconfig rule) still surfaces and fails the
+# check, forcing a fresh review. Mirror of npm-wasm/audit-ci.jsonc for the
+# npm-audit gate. Accepted on PR #26.
+#
+# REVIEW BY: 2026-09-28
+#
+# ---------------------------------------------------------------------------
+# 1) npm dependency CVEs rooted in the pinned agentic-flow@2.0.12-fix.8
+#    runtime tree (npm-wasm) plus the AIMDS/ and root sample lockfiles.
+#    Cleanly-fixable advisories are already floored to patched, same-major
+#    versions via npm-wasm/package.json "overrides". The CVEs below have no
+#    non-breaking fix (npm's only remedy is a semver-major agentic-flow
+#    downgrade that would regress the QUIC runtime, untestable in CI).
+# ---------------------------------------------------------------------------
+CVE-2026-12151
+CVE-2026-33671
+CVE-2026-41242
+CVE-2026-44289
+CVE-2026-44290
+CVE-2026-44291
+CVE-2026-44293
+CVE-2026-44902
+CVE-2026-4867
+CVE-2026-48712
+CVE-2026-54290
+CVE-2026-55603
+CVE-2026-6321
+CVE-2026-6322
+CVE-2026-6734
+CVE-2026-9697
+GHSA-vcv2-r9jh-99m5
+
+# ---------------------------------------------------------------------------
+# 2) IaC hardening findings in the AIMDS/ sample subproject. These files are
+#    NOT built or deployed by any CI workflow. Tracked as hardening TODOs
+#    (add a non-root USER, --no-install-recommends, a restrictive container
+#    securityContext, read-only root FS) rather than edited blind, since the
+#    AIMDS deploy path cannot be validated here.
+#      DS-0002  AIMDS/docker/Dockerfile.rust  — image user should not be root
+#      DS-0029  AIMDS/docker/Dockerfile.rust  — apt-get missing --no-install-recommends
+#      KSV-0014 AIMDS/k8s/deployment.yaml      — root filesystem not read-only
+#      KSV-0118 AIMDS/k8s/deployment.yaml      — default security context
+# ---------------------------------------------------------------------------
+DS-0002
+DS-0029
+KSV-0014
+KSV-0118

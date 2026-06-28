@@ -1,0 +1,60 @@
+// audit-ci configuration for @midstream/wasm (npm-wasm).
+//
+// Why this file exists:
+//   npm-wasm depends on agentic-flow@2.0.12-fix.8 (pinned RUNTIME dep, QUIC
+//   transport). Its transitive tree carries high/critical advisories whose
+//   ONLY npm-suggested fix is a semver-MAJOR downgrade to agentic-flow@1.9.0
+//   -- a breaking regression of the QUIC runtime that cannot be verified in
+//   CI. Cleanly-fixable advisories are already floored to patched, same-major
+//   versions via the "overrides" block in package.json (genuine fixes, no
+//   suppression). The advisories listed below have no non-breaking fix and are
+//   accepted as documented, tracked risk per maintainer decision on PR #26.
+//
+//   Scope: high + critical only (skip-dev: true -> production deps only).
+//   This is an ID-scoped allowlist: any NEW advisory in this tree will fail
+//   the gate and force a fresh review -- it does not blanket-ignore the tree.
+//
+//   REVIEW BY: 2026-09-28 (re-evaluate when agentic-flow ships a fixed line).
+//   See also: ../.trivyignore (mirror for the Trivy scanner).
+{
+  "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+  "high": true,
+  "skip-dev": true,
+  "allowlist": [
+    "GHSA-2gcr-mfcq-wcc3",
+    "GHSA-2pr8-phx7-x9h3",
+    "GHSA-35p6-xmwp-9g52",
+    "GHSA-37ch-88jc-xwx2",
+    "GHSA-3hrh-pfw6-9m5x",
+    "GHSA-3v7f-55p6-f55p",
+    "GHSA-64mm-vxmg-q3vj",
+    "GHSA-66ff-xgx4-vchm",
+    "GHSA-685m-2w69-288q",
+    "GHSA-75px-5xx7-5xc7",
+    "GHSA-88fw-hqm2-52qc",
+    "GHSA-c2c7-rcm5-vvqj",
+    "GHSA-f38q-mgvj-vph7",
+    "GHSA-f577-qrjj-4474",
+    "GHSA-fx83-v9x8-x52w",
+    "GHSA-g8m3-5g58-fq7m",
+    "GHSA-gcq2-9pq2-cxqm",
+    "GHSA-hm92-r4w5-c3mj",
+    "GHSA-j6c9-x7qj-28xf",
+    "GHSA-jggg-4jg4-v7c6",
+    "GHSA-jvwf-75h9-cwgg",
+    "GHSA-p88m-4jfj-68fv",
+    "GHSA-pr7r-676h-xcf6",
+    "GHSA-q3j6-qgpj-74h6",
+    "GHSA-q6x5-8v7m-xcrf",
+    "GHSA-q7rr-3cgh-j5r3",
+    "GHSA-rv63-4mwf-qqc2",
+    "GHSA-v39h-62p7-jpjc",
+    "GHSA-vmh5-mc38-953g",
+    "GHSA-vxpw-j846-p89q",
+    "GHSA-wcpc-wj8m-hjx6",
+    "GHSA-wgpf-jwqj-8h8p",
+    "GHSA-wwfh-h76j-fc44",
+    "GHSA-xq3m-2v4x-88gg",
+    "GHSA-xrhx-7g5j-rcj5"
+  ]
+}

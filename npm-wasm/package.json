@@ -1,14 +1,18 @@
 {
-  "name": "@midstream/wasm",
-  "version": "1.0.0",
-  "description": "WebAssembly bindings for Midstream temporal comparison, scheduling, and meta-learning",
+  "name": "midstreamer",
+  "version": "0.3.1",
+  "description": "WebAssembly bindings for Midstream temporal comparison, scheduling, and meta-learning + real QUIC transport via agentic-flow",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "types/index.d.ts",
   "files": [
-    "dist",
-    "types",
-    "README.md"
+    "pkg",
+    "pkg-node",
+    "pkg-bundler",
+    "README.md",
+    "QUICK_START.md",
+    "PACKAGE_SUMMARY.md",
+    "quic.js"
   ],
   "scripts": {
     "build:wasm": "wasm-pack build --target web --out-dir pkg",
@@ -41,12 +45,13 @@
     "performance"
   ],
   "author": "Midstream Contributors",
-  "license": "MIT",
+  "license": "(MIT OR Apache-2.0)",
   "dependencies": {
-    "@peculiar/webcrypto": "^1.4.3"
+    "@peculiar/webcrypto": "^1.4.3",
+    "agentic-flow": "2.0.12-fix.8"
   },
   "devDependencies": {
-    "wasm-pack": "^0.15.0",
+    "wasm-pack": "^0.12.1",
     "webpack": "^5.106.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.5",
@@ -57,7 +62,21 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "overrides": {
+    "shell-quote": "^1.9.0",
+    "ws": "^8.21.0",
+    "@grpc/grpc-js": "^1.14.4",
+    "form-data": "^4.0.6",
+    "node-forge": "^1.4.0",
+    "qs": "^6.15.3",
+    "tar": "^7.5.19",
+    "brace-expansion": "^2.0.2"
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    "./quic": "./quic.js",
+    "./package.json": "./package.json"
   }
 }

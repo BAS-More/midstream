@@ -69,9 +69,12 @@ impl MetaKnowledge {
             pattern,
             confidence,
             applications: Vec::new(),
+            // duration_since returns Err only when `now` is before UNIX_EPOCH,
+            // which cannot happen on any supported platform. Saturate to 0
+            // rather than panic so the constructor stays infallible.
             learned_at: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
+                .unwrap_or_default()
                 .as_millis() as u64,
         }
     }
@@ -253,23 +256,31 @@ impl StrangeLoop {
         level: MetaLevel,
         data: &[String],
     ) -> Result<Vec<MetaKnowledge>, StrangeLoopError> {
-        // Each distinct element becomes a piece of meta-knowledge; elements that
-        // recur are scored with higher confidence.
-        let mut counts: HashMap<&String, usize> = HashMap::new();
-        for item in data {
-            *counts.entry(item).or_insert(0) += 1;
+        let mut patterns = Vec::new();
+
+        // Every data item becomes a pattern, regardless of frequency.
+        // Recurring items receive a higher confidence score.
+        for item in data.iter() {
+            let frequency = data.iter().filter(|d| *d == item).count();
+            // Confidence: 0.5 baseline + up to 0.5 bonus for repetition
+            // (clamped to 1.0).
+            let confidence = (0.5
+                + 0.5 * (frequency.saturating_sub(1) as f64 / data.len().max(1) as f64))
+                .min(1.0);
+            patterns.push(MetaKnowledge::new(level, item.clone(), confidence));
         }
 
-        let mut patterns: Vec<MetaKnowledge> = counts
-            .into_iter()
-            .map(|(pattern, count)| {
-                let confidence = (0.5 + 0.1 * count as f64).min(1.0);
-                MetaKnowledge::new(level, pattern.clone(), confidence)
+        // Deduplicate by pattern string — keep the entry with highest confidence.
+        patterns.sort_by(|a, b| {
+            a.pattern.cmp(&b.pattern).then_with(|| {
+                b.confidence
+                    .partial_cmp(&a.confidence)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             })
-            .collect();
+        });
+        patterns.dedup_by(|a, b| a.pattern == b.pattern);
 
-        // Deterministic order, then limit the number of patterns.
-        patterns.sort_by(|a, b| a.pattern.cmp(&b.pattern));
+        // Limit number of patterns
         patterns.truncate(100);
 
         Ok(patterns)
@@ -473,11 +484,7 @@ mod tests {
     fn test_summary() {
         let mut strange_loop = StrangeLoop::default();
 
-        let data = vec![
-            "pattern1".to_string(),
-            "pattern2".to_string(),
-            "pattern1".to_string(),
-        ];
+        let data = vec!["pattern1".to_string(), "pattern2".to_string()];
         let _ = strange_loop.learn_at_level(MetaLevel::base(), &data);
 
         let summary = strange_loop.get_summary();

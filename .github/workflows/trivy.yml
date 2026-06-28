@@ -34,6 +34,8 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           scanners: vuln,secret,misconfig
+          # Documented, ID-scoped accepted-risk suppressions (see .trivyignore).
+          trivyignores: .trivyignore
           exit-code: '0'  # don't fail PR; surface via SARIF + Security tab
 
       - name: Upload SARIF to GitHub Advanced Security
