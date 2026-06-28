@@ -148,7 +148,17 @@ jobs:
           cache-dependency-path: ${{ matrix.package }}/package-lock.json
       - name: npm audit (high-severity)
         working-directory: ${{ matrix.package }}
-        run: npm audit --audit-level=high
+        # Packages that ship an `audit-ci.jsonc` (currently only npm-wasm)
+        # run audit-ci, which applies a documented, ID-scoped allowlist for
+        # advisories rooted in the pinned agentic-flow runtime tree that have
+        # no non-breaking fix (see npm-wasm/audit-ci.jsonc). Any NEW advisory
+        # still fails the gate. All other packages use plain `npm audit`.
+        run: |
+          if [ -f audit-ci.jsonc ]; then
+            npx --yes audit-ci@^7 --config audit-ci.jsonc
+          else
+            npm audit --audit-level=high
+          fi
 
   js-ci-success:
     name: JS CI gates passed
