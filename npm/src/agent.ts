@@ -95,13 +95,50 @@ export class MidStreamAgent {
       return comparator?.compare(seq1, seq2, algorithm) || 0;
     }
 
-    // Simple fallback: Jaccard similarity
+    // Fallback implementations used when the WASM module is unavailable.
+    // Two empty sequences are identical; an empty vs non-empty pair shares
+    // nothing. Guarding here also avoids the 0/0 = NaN case below.
+    if (seq1.length === 0 && seq2.length === 0) {
+      return 1;
+    }
+    if (seq1.length === 0 || seq2.length === 0) {
+      return 0;
+    }
+
+    if (algorithm === 'lcs') {
+      // Longest-common-subsequence similarity, normalised by the longer
+      // sequence so a shared ordered prefix/suffix scores highly.
+      const lcs = this.longestCommonSubsequenceLength(seq1, seq2);
+      return lcs / Math.max(seq1.length, seq2.length);
+    }
+
+    // Default fallback: Jaccard set similarity.
     const set1 = new Set(seq1);
     const set2 = new Set(seq2);
     const intersection = new Set([...set1].filter(x => set2.has(x)));
     const union = new Set([...set1, ...set2]);
 
     return intersection.size / union.size;
+  }
+
+  /**
+   * Length of the longest common subsequence of two sequences (fallback
+   * helper for {@link compareSequences} when the WASM comparator is absent).
+   */
+  private longestCommonSubsequenceLength(a: string[], b: string[]): number {
+    const m = a.length;
+    const n = b.length;
+    const dp: number[][] = Array.from({ length: m + 1 }, () =>
+      new Array<number>(n + 1).fill(0)
+    );
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1] + 1
+          : Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+    return dp[m][n];
   }
 
   /**
@@ -140,15 +177,26 @@ export class MidStreamAgent {
       this.rewardHistory = this.rewardHistory.slice(-this.config.maxHistory!);
     }
 
-    // Simple stability check (fallback)
+    // With no samples there is no behaviour to analyse — report a neutral,
+    // stable result rather than propagating NaN from a 0/0 mean.
+    if (rewards.length === 0) {
+      return { isStable: true, isChaotic: false, lyapunovExponent: 0 };
+    }
+
+    // Simple stability check (fallback). Rewards are expected in the [0, 1]
+    // range, where a uniformly random ("chaotic") stream has a standard
+    // deviation of ~0.29; a steady stream sits well under 0.1. The chaotic
+    // threshold (0.12) sits comfortably above the stable band (~0.015) yet
+    // far enough below the random mean to keep the unseeded-random test
+    // non-flaky (P(stdDev < 0.12) ~ 0.02% for n=20).
     const mean = rewards.reduce((a, b) => a + b, 0) / rewards.length;
     const variance = rewards.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / rewards.length;
     const stdDev = Math.sqrt(variance);
 
     return {
       isStable: stdDev < 0.1,
-      isChaotic: stdDev > 0.5,
-      lyapunovExponent: stdDev > 0.5 ? 0.5 : -0.5,
+      isChaotic: stdDev > 0.12,
+      lyapunovExponent: stdDev > 0.12 ? 0.5 : -0.5,
     };
   }
 

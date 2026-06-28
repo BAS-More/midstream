@@ -4,8 +4,8 @@ node_modules/
 # Build output
 dist/
 
-# Lock files
-package-lock.json
+# Lock file is committed so CI (`npm ci` + setup-node cache) has a
+# checked-in, reproducible dependency graph. See .github/workflows/js-ci.yml.
 
 # Environment variables
 .env
