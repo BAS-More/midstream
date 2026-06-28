@@ -20,7 +20,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["javascript-typescript", "rust"]
+        # Mirrors the languages the (now-disabled) CodeQL default setup
+        # covered for code that actually exists in the repo: GitHub Actions
+        # workflows, JS/TS, and Rust. Python is intentionally omitted — the
+        # repo contains no Python source (default setup's python leg only
+        # ever produced a "no source code seen" configuration error).
+        language: ["actions", "javascript-typescript", "rust"]
 
     steps:
       - name: Checkout repository
