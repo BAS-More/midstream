@@ -431,9 +431,9 @@ where
         algorithm: ComparisonAlgorithm,
     ) -> String {
         format!(
-            "{:x}:{:x}:{:?}",
-            hash_sequence(seq1),
-            hash_sequence(seq2),
+            "{:?}:{:?}:{:?}",
+            seq1.elements.len(),
+            seq2.elements.len(),
             algorithm
         )
     }

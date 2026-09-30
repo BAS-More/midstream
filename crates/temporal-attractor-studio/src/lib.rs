@@ -212,7 +212,7 @@ impl AttractorAnalyzer {
             }
 
             if count > 0 {
-                *exponent = sum_log_divergence / count as f64;
+                exponents[dim] = sum_log_divergence / count as f64;
             }
         }
 

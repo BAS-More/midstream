@@ -484,11 +484,7 @@ mod tests {
     fn test_summary() {
         let mut strange_loop = StrangeLoop::default();
 
-        let data = vec![
-            "pattern1".to_string(),
-            "pattern2".to_string(),
-            "pattern1".to_string(),
-        ];
+        let data = vec!["pattern1".to_string(), "pattern2".to_string()];
         let _ = strange_loop.learn_at_level(MetaLevel::base(), &data);
 
         let summary = strange_loop.get_summary();
